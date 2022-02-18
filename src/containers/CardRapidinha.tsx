@@ -117,7 +117,9 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
             })
 
             global.toggleReloadProfile()
-            setPurchasedNumbers([...purchasedNumbers, ...data.newBet])
+            if (purchasedNumbers) {
+                setPurchasedNumbers([...purchasedNumbers, ...data.newBet])
+            }
         } catch (error) {
             console.error(error)
         }
