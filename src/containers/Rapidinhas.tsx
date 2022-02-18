@@ -51,7 +51,7 @@ const Rapidinhas: React.FC = () => {
 
             <Flex
                 gridGap="15px"
-                direction="column-reverse"
+                direction={["column-reverse", "column-reverse", "row", "row", "row"]}
             >
                 {!rapidinhasData &&
                     <Stack>

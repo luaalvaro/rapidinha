@@ -90,7 +90,7 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                         <Text
                             fontSize="14px"
                         >
-                            ??/{data.qtd_num}
+                            {purchasedNumbers.length}/{data.qtd_num}
                         </Text>
                     </Flex>
 
