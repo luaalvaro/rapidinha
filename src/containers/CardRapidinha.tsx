@@ -1,4 +1,5 @@
 import { Flex, Text, Center, Button, Grid, Stack, Skeleton, } from '@chakra-ui/react'
+import { User } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
 import { supabase } from '../utils/supabaseClient'
 import { Rapidinha } from './Rapidinhas'
@@ -20,6 +21,7 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
 
     const [purchasedNumbers, setPurchasedNumbers] = useState<PurchasedNumbersProps[] | null>(null)
     const [chosenNumber, setChosenNumber] = useState<string | null>(null)
+    const [user, setUser] = useState<User | null>(null)
 
     const numbers = [
         '1', '2', '3', '4', '5',
@@ -58,9 +60,28 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
         }
     }
 
+    const checkIsLogged = () => {
+        const response = supabase.auth.user()
+        setUser(response)
+    }
+
+    const handlePurchaseTicket = async () => {
+        /**
+         * Essa função precisa identificar o usuário (id)
+         * e a INTENÇÃO DE COMPRA (Número disponível da rapidinha)
+         * e uma serverless function vai ser chamada
+         * para lidar com o processo de compra da rapidinha
+         */
+    }
+
     useEffect(() => {
         getPurchasedNumbers()
     }, [])
+
+    useEffect(() => {
+        checkIsLogged()
+    }, [chosenNumber])
+
     return (
         <Flex
             background="#E0E0E0"
@@ -76,6 +97,7 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                     <Skeleton height='20px' />
                 </Stack>
             }
+
             {purchasedNumbers &&
                 <>
                     <Flex
@@ -158,7 +180,6 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                         <Button
                             width="100%"
                             bg="#25D985"
-                            disabled
 
                             _hover={{
                                 background: '#20C578'
@@ -167,7 +188,7 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                                 background: '#20C578'
                             }}
                         >
-                            Selecione um número
+                            {!chosenNumber ? 'Selecione um número' : !user ? 'Faça login para participar' : 'Participar'}
                         </Button>
                     </Flex>
                 </>
