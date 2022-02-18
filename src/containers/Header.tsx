@@ -6,19 +6,38 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../utils/supabaseClient'
 import { FaBars, FaUser } from 'react-icons/fa'
 import { IoMdExit } from 'react-icons/io'
+
 interface HeaderProps {
     variant?: string,
+}
+
+interface Profiles {
+    avatarUrl: string | null
+    cpf: string
+    currency: 0
+    firstName: string
+    id: string
+    telefone: string
+    updatedAt: string
 }
 
 const Header: React.FC<HeaderProps> = ({ variant }) => {
 
     const router = useRouter()
-    const [user, setUser] = useState<User | null>(null)
+    const [user, setUser] = useState<Profiles | null>(null)
 
     const getUserProfile = async () => {
-        const user = supabase.auth.user()
 
-        setUser(user)
+        try {
+            const { data, error } = await supabase
+                .from<Profiles>('profiles')
+                .select('*')
+                .single()
+
+            setUser(data)
+        } catch (error) {
+            console.error(error)
+        }
     }
 
     const handleLogout = () => {
@@ -101,7 +120,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                         px="12px"
                         border="1px solid rgba(255,255,255,0.5)"
                     >
-                        <Text>R$ 12</Text>
+                        <Text>R$ {user.currency}</Text>
                     </Flex>
 
                     <Menu>
@@ -109,7 +128,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                             color="#fff"
                             as={IconButton}
                             aria-label='Options'
-                            icon={<FaUser />}
+                            icon={<FaBars />}
                             variant='outline'
 
                             _hover={{
@@ -121,6 +140,9 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                             }}
                         />
                         <MenuList>
+                            <MenuItem>
+                                Olá, {user.firstName}
+                            </MenuItem>
                             <MenuItem icon={<FaUser />}>
                                 Perfil
                             </MenuItem>

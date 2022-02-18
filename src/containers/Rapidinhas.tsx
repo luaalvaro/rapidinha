@@ -1,4 +1,4 @@
-import { Button, Center, Flex, Text } from '@chakra-ui/react'
+import { Button, Center, Flex, Skeleton, Stack, Text } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { supabase } from '../utils/supabaseClient'
 import CardRapidinha from './CardRapidinha'
@@ -53,6 +53,14 @@ const Rapidinhas: React.FC = () => {
                 gridGap="15px"
                 direction="column-reverse"
             >
+                {!rapidinhasData &&
+                    <Stack>
+                        <Skeleton height='20px' />
+                        <Skeleton height='20px' />
+                        <Skeleton height='20px' />
+                    </Stack>
+                }
+
                 {rapidinhasData && rapidinhasData?.map((rapidinha, index) => (
                     <CardRapidinha
                         key={index}

@@ -75,8 +75,9 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                     gridTemplateColumns="repeat(5, 1fr)"
                     gridGap="10px"
                 >
-                    {numbers.map(num => (
+                    {numbers.map((num, index) => (
                         <Center
+                            key={index}
                             width="30px"
                             height="30px"
 
