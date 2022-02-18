@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../utils/supabaseClient'
 import { FaBars, FaUser } from 'react-icons/fa'
 import { IoMdExit } from 'react-icons/io'
+import useGlobal from '../store/globalStore'
 
 interface HeaderProps {
     variant?: string,
@@ -25,6 +26,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
 
     const router = useRouter()
     const [user, setUser] = useState<Profiles | null>(null)
+    const global = useGlobal(state => state)
 
     const getUserProfile = async () => {
 
@@ -47,7 +49,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
 
     useEffect(() => {
         getUserProfile()
-    }, [])
+    }, [global.reloadProfile])
 
     return (
         <Flex

@@ -1,6 +1,8 @@
-import { Flex, Text, Center, Button, Grid, Stack, Skeleton, } from '@chakra-ui/react'
+import { Flex, Text, Center, Button, Grid, Stack, Skeleton, toast, useToast, } from '@chakra-ui/react'
 import { User } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
+import { Z_BEST_SPEED } from 'zlib'
+import useGlobal from '../store/globalStore'
 import { supabase } from '../utils/supabaseClient'
 import { Rapidinha } from './Rapidinhas'
 
@@ -22,6 +24,8 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
     const [purchasedNumbers, setPurchasedNumbers] = useState<PurchasedNumbersProps[] | null>(null)
     const [chosenNumber, setChosenNumber] = useState<string | null>(null)
     const [user, setUser] = useState<User | null>(null)
+    const toast = useToast()
+    const global = useGlobal(state => state)
 
     const numbers = [
         '1', '2', '3', '4', '5',
@@ -65,13 +69,58 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
         setUser(response)
     }
 
-    const handlePurchaseTicket = async () => {
+    const handlePurchaseTicket = async (id_rap: number) => {
+
         /**
          * Essa função precisa identificar o usuário (id)
          * e a INTENÇÃO DE COMPRA (Número disponível da rapidinha)
          * e uma serverless function vai ser chamada
          * para lidar com o processo de compra da rapidinha
          */
+
+        const session = supabase.auth.session()
+
+        if (!session)
+            return toast({
+                title: 'Faça login para participar',
+                status: 'error',
+                duration: 5000
+            })
+
+        if (!chosenNumber)
+            return toast({
+                title: 'Escolha um número para participar',
+                status: 'error',
+                duration: 5000
+            })
+
+
+        try {
+            const response = await fetch('/api/v1/buyticket', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`,
+                    'Content-type': 'Application/json'
+                },
+                body: JSON.stringify({
+                    id_rapidinha: id_rap,
+                    chosen_number: chosenNumber
+                })
+            })
+
+            const data = await response.json()
+
+            toast({
+                title: 'Participação confirmada',
+                status: 'success',
+                duration: 5000
+            })
+
+            global.toggleReloadProfile()
+            setPurchasedNumbers([...purchasedNumbers, ...data.newBet])
+        } catch (error) {
+            console.error(error)
+        }
     }
 
     useEffect(() => {
@@ -180,6 +229,8 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                         <Button
                             width="100%"
                             bg="#25D985"
+
+                            onClick={() => handlePurchaseTicket(Number(data.id))}
 
                             _hover={{
                                 background: '#20C578'
