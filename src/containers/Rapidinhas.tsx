@@ -54,7 +54,7 @@ const Rapidinhas: React.FC = () => {
                 direction={["column-reverse", "column-reverse", "row", "row", "row"]}
             >
                 {!rapidinhasData &&
-                    <Stack>
+                    <Stack width="100%">
                         <Skeleton height='20px' />
                         <Skeleton height='20px' />
                         <Skeleton height='20px' />

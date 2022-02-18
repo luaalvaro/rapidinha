@@ -24,6 +24,8 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
     const [purchasedNumbers, setPurchasedNumbers] = useState<PurchasedNumbersProps[] | null>(null)
     const [chosenNumber, setChosenNumber] = useState<string | null>(null)
     const [user, setUser] = useState<User | null>(null)
+    const [loading, setLoading] = useState(false)
+
     const toast = useToast()
     const global = useGlobal(state => state)
 
@@ -77,7 +79,7 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
          * e uma serverless function vai ser chamada
          * para lidar com o processo de compra da rapidinha
          */
-
+        setLoading(true)
         const session = supabase.auth.session()
 
         if (!session)
@@ -122,6 +124,9 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
             }
         } catch (error) {
             console.error(error)
+        } finally {
+            setChosenNumber(null)
+            setLoading(false)
         }
     }
 
@@ -142,7 +147,7 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
         >
 
             {!purchasedNumbers &&
-                <Stack>
+                <Stack width="220px">
                     <Skeleton height='20px' />
                     <Skeleton height='20px' />
                     <Skeleton height='20px' />
@@ -231,6 +236,8 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                         <Button
                             width="100%"
                             bg="#25D985"
+
+                            isLoading={loading}
 
                             onClick={() => handlePurchaseTicket(Number(data.id))}
 

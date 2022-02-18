@@ -1,7 +1,6 @@
 import { NextPage } from 'next'
-import { Button, Flex, FormControl, FormLabel, Input, Text, useToast } from '@chakra-ui/react'
-import Header from '../containers/Header'
-import Rapidinhas from '../containers/Rapidinhas'
+import { Button, Flex, FormControl, Link as A, FormLabel, Input, Text, useToast } from '@chakra-ui/react'
+import Link from 'next/link'
 import Container from '../components/Container'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
@@ -53,8 +52,8 @@ const Login: NextPage = () => {
         // const { user, error } = await supabase
         //     .auth
         //     .signUp({
-        //         email: 'luan.alc@hotmail.com',
-        //         password: 'l@lC7651420',
+        //         email: '',
+        //         password: '',
         //     })
 
         // console.log(user)
@@ -88,15 +87,17 @@ const Login: NextPage = () => {
                     Cadastre-se
                 </Button>
             </Flex>
-
-            <Flex
-                mt="30px"
-                align="center"
-                justify="center"
-            >
-                <Image src="/logo.svg" alt="logo" width={200} height={100} />
-            </Flex>
-
+            <Link href="/">
+                <A>
+                    <Flex
+                        mt="30px"
+                        align="center"
+                        justify="center"
+                    >
+                        <Image src="/logo.svg" alt="logo" width={200} height={100} />
+                    </Flex>
+                </A>
+            </Link>
             <Text
                 mt="30px"
                 textAlign="center"
@@ -106,65 +107,70 @@ const Login: NextPage = () => {
                 Faça o login em sua conta
             </Text>
 
-            <FormControl
-                mt="50px"
-                px="25px"
-                id="email"
-            >
-                <FormLabel
-                    color="#fff"
-                >
-                    Email
-                </FormLabel>
-                <Input
-                    color="#fff"
-                    background="#553D5C"
-                    border="0"
-                    placeholder="Email"
-                    value={email}
-                    onChange={event => setEmail(event.target.value)}
-                />
-            </FormControl>
-
-            <FormControl
-                mt="15px"
-                px="25px"
-                id="pass"
-            >
-                <FormLabel
-                    color="#fff"
-                >
-                    Senha
-                </FormLabel>
-                <Input
-                    type="password"
-                    color="#fff"
-                    background="#553D5C"
-                    border="0"
-                    placeholder="******"
-                    value={password}
-                    onChange={event => setPassword(event.target.value)}
-                />
-            </FormControl>
-
-            <Flex
-                mt="5px"
-                px="25px"
-                fontSize="14px"
-                opacity={.8}
-            >
-                <Text
-                    color="#fff"
-                >
-                    Precisa de ajuda?
-                </Text>
-            </Flex>
-
             <Flex
                 width="100%"
+                maxWidth="600px"
+                mx="auto"
                 px="25px"
                 mt="30px"
+                direction="column"
             >
+                <FormControl
+                    mt="50px"
+                    // px="25px"
+                    id="email"
+                >
+                    <FormLabel
+                        color="#fff"
+                    >
+                        Email
+                    </FormLabel>
+                    <Input
+                        color="#fff"
+                        background="#553D5C"
+                        border="0"
+                        placeholder="Email"
+                        value={email}
+                        onChange={event => setEmail(event.target.value)}
+                    />
+                </FormControl>
+
+                <FormControl
+                    mt="15px"
+                    // px="25px"
+                    id="pass"
+                >
+                    <FormLabel
+                        color="#fff"
+                    >
+                        Senha
+                    </FormLabel>
+                    <Input
+                        type="password"
+                        color="#fff"
+                        background="#553D5C"
+                        border="0"
+                        placeholder="******"
+                        value={password}
+                        onChange={event => setPassword(event.target.value)}
+                    />
+                </FormControl>
+
+                <Flex
+                    mt="5px"
+                    // px="25px"
+                    fontSize="14px"
+                    opacity={.8}
+                    mb="40px"
+                >
+                    <Text
+                        color="#fff"
+                    >
+                        Precisa de ajuda?
+                    </Text>
+                </Flex>
+
+
                 <Button
                     isLoading={loading}
                     width="100%"

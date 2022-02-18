@@ -122,7 +122,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                         px="12px"
                         border="1px solid rgba(255,255,255,0.5)"
                     >
-                        <Text>R$ {user.currency}</Text>
+                        <Text width="max-content">R$ {user.currency}</Text>
                     </Flex>
 
                     <Menu>
