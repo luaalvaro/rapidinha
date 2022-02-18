@@ -177,7 +177,7 @@ const Login: NextPage = () => {
                         background: '#20C578'
                     }}
                 >
-                    Cadastre-se
+                    Entrar
                 </Button>
             </Flex>
         </Container>
