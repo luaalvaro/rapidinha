@@ -79,7 +79,7 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
          * e uma serverless function vai ser chamada
          * para lidar com o processo de compra da rapidinha
          */
-        setLoading(true)
+
         const session = supabase.auth.session()
 
         if (!session)
@@ -98,6 +98,7 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
 
 
         try {
+            setLoading(true)
             const response = await fetch('/api/v1/buyticket', {
                 method: 'POST',
                 headers: {
