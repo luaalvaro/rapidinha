@@ -48,7 +48,11 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
     }
 
     useEffect(() => {
-        getUserProfile()
+        const userSupabase = supabase.auth.user()
+
+        if (userSupabase) {
+            getUserProfile()
+        }
     }, [global.reloadProfile])
 
     return (

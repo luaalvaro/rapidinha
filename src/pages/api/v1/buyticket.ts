@@ -15,7 +15,9 @@ interface RapidinhaProps {
 }
 
 interface Bets {
-    chosen_number: number
+    chosen_number: number,
+    id: string,
+    user_id: string,
 }
 const handler: NextApiHandler = async (req, res) => {
 
@@ -91,8 +93,16 @@ const handler: NextApiHandler = async (req, res) => {
             return true
 
         const filtered = bets.filter(bet => bet.chosen_number === number)
-
         if (filtered.length === 0)
+            return true
+
+        return false
+    }
+
+    const checkIfUserHasTicket = (bets: Bets[], user_id: string) => {
+
+        const filteredId = bets.filter(bet => bet.user_id === user_id)
+        if (filteredId.length !== 0)
             return true
 
         return false
@@ -151,14 +161,14 @@ const handler: NextApiHandler = async (req, res) => {
     const token = req.headers.authorization?.split('Bearer ')[1]
 
     if (!token)
-        return res.status(401).json({ message: '154 Unauthorized' })
+        return res.status(401).json({ message: '164 - Não autorizado' })
 
     const user = checkTokenIsValid(token)
 
     const { id_rapidinha, chosen_number } = req.body;
 
     if (!id_rapidinha || !chosen_number)
-        return res.status(400).json({ message: '161 Bad request' })
+        return res.status(400).json({ message: '171 - Requisição bloqueada' })
 
     const user_id = user?.sub || ""
     const userCurrency = await getUserCurrency(user_id)
@@ -166,16 +176,21 @@ const handler: NextApiHandler = async (req, res) => {
     const ticket_value = rapidinha.ticket_value || 0
 
     if (chosen_number < 1 || chosen_number > rapidinha.qtd_num)
-        return res.status(400).json({ message: '169 Number invalid' })
+        return res.status(400).json({ message: '179 - Número inválido' })
 
     if (userCurrency < rapidinha.ticket_value)
-        return res.status(400).json({ message: '172 Insuficient Founds' })
+        return res.status(400).json({ message: '182 - Saldo insuficiente' })
 
     const bets = await getAllBets(rapidinha.id)
     const isAvaliable = checkNumberAvaliable(chosen_number, bets || [])
 
     if (!isAvaliable)
-        return res.status(400).json({ message: '178 Number unavailable' })
+        return res.status(400).json({ message: '188 - Número já selecionado por outro usuário' })
+
+    const hasTicket = checkIfUserHasTicket(bets || [], user_id)
+
+    if (hasTicket)
+        return res.status(400).json({ message: '193 - Permitido apenas 01 ticket por usuário' })
 
     // Usuário tem dinheiro pra apostar
     // Número está válido

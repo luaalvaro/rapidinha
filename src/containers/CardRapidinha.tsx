@@ -113,16 +113,31 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
 
             const data = await response.json()
 
-            toast({
-                title: 'Participação confirmada',
-                status: 'success',
-                duration: 5000
-            })
+            console.log(response.status)
 
-            global.toggleReloadProfile()
-            if (purchasedNumbers) {
-                setPurchasedNumbers([...purchasedNumbers, ...data.newBet])
+            if (response.status === 200) {
+                toast({
+                    title: 'Participação confirmada',
+                    status: 'success',
+                    duration: 5000
+                })
+
+                global.toggleReloadProfile()
+
+                if (purchasedNumbers) {
+                    setPurchasedNumbers([...purchasedNumbers, ...data.newBet])
+                }
             }
+
+            if (response.status !== 200) {
+                console.log(data.message)
+                toast({
+                    title: data.message,
+                    status: 'error',
+                    duration: 5000
+                })
+            }
+
         } catch (error) {
             console.error(error)
         } finally {
@@ -148,7 +163,7 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
         >
 
             {!purchasedNumbers &&
-                <Stack width="220px">
+                <Stack width="100%">
                     <Skeleton height='20px' />
                     <Skeleton height='20px' />
                     <Skeleton height='20px' />
@@ -234,23 +249,25 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                     </Flex>
 
                     <Flex>
-                        <Button
-                            width="100%"
-                            bg="#25D985"
+                        {user &&
+                            <Button
+                                width="100%"
+                                bg="#25D985"
 
-                            isLoading={loading}
+                                isLoading={loading}
 
-                            onClick={() => handlePurchaseTicket(Number(data.id))}
+                                onClick={() => handlePurchaseTicket(Number(data.id))}
 
-                            _hover={{
-                                background: '#20C578'
-                            }}
-                            _active={{
-                                background: '#20C578'
-                            }}
-                        >
-                            {!chosenNumber ? 'Selecione um número' : !user ? 'Faça login para participar' : 'Participar'}
-                        </Button>
+                                _hover={{
+                                    background: '#20C578'
+                                }}
+                                _active={{
+                                    background: '#20C578'
+                                }}
+                            >
+                                {!chosenNumber ? 'Selecione um número' : !user ? 'Faça login para participar' : 'Participar'}
+                            </Button>
+                        }
                     </Flex>
                 </>
             }

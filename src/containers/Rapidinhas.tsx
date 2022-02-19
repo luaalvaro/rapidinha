@@ -24,6 +24,7 @@ const Rapidinhas: React.FC = () => {
             const { data, error } = await supabase
                 .from<Rapidinha>('rapidinhas')
                 .select('*')
+                .eq('status', 'waiting')
 
             setRapidinhasData(data)
         } catch (error) {
@@ -46,7 +47,7 @@ const Rapidinhas: React.FC = () => {
                 mb="20px"
                 fontWeight={600}
             >
-                Rapidinhas agora
+                Rapidinhas
             </Text>
 
             <Flex
