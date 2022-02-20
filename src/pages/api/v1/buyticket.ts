@@ -274,9 +274,9 @@ const handler: NextApiHandler = async (req, res) => {
     if (!isAvaliable)
         return res.status(400).json({ message: '195 - Número já selecionado por outro usuário' })
 
-    const hasTicket = checkIfUserHasTicket(bets || [], user_id)
-    if (hasTicket)
-        return res.status(400).json({ message: '193 - Permitido apenas 02 ticket por usuário' })
+    // const hasTicket = checkIfUserHasTicket(bets || [], user_id)
+    // if (hasTicket)
+    //     return res.status(400).json({ message: '193 - Permitido apenas 02 ticket por usuário' })
 
     const newPurchase = await handleNewPurchaseTicket(
         id_rapidinha,
