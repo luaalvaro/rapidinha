@@ -265,8 +265,8 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                                     onClick={() => preSelectNumber(num)}
 
                                     _hover={{
-                                        background: checkNumberPurchased(num) ? user ? '#44AFEC' : '' : '',
-                                        color: checkNumberPurchased(num) ? user ? '#fff' : '' : '',
+                                        background: checkNumberPurchased(num) ? '' : user ? '#44AFEC' : '',
+                                        color: checkNumberPurchased(num) ? '' : user ? '#fff' : '',
                                     }}
                                 >
                                     {num}
