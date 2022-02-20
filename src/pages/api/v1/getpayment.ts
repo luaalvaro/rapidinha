@@ -128,7 +128,8 @@ const handler: NextApiHandler = async (req, res) => {
         return res.status(400).json({ message: '111 Esta rapidinha já pagou o vencedor' })
 
     const userCurrency = await getUserCurrency(user.sub || "")
-    if (!userCurrency)
+    console.log('TYPEOF ', typeof userCurrency)
+    if (typeof userCurrency === 'undefined')
         return res.status(400).json({ message: '111 Usuário inválido' })
 
     console.log('Saldo atual do ganhador', userCurrency)
