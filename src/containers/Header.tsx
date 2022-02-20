@@ -29,7 +29,6 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
     const global = useGlobal(state => state)
 
     const getUserProfile = async () => {
-
         try {
             const { data, error } = await supabase
                 .from<Profiles>('profiles')
@@ -65,7 +64,10 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
             gridGap={variant !== "auth" ? "0" : "50px"}
         >
 
-            <Flex>
+            <Flex
+                cursor="pointer"
+                onClick={() => router.push('/')}
+            >
                 <Image src="/logo.svg" alt="logo" width={85} height={29} priority />
             </Flex>
 
@@ -142,7 +144,10 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                             <MenuItem icon={<FaUser />}>
                                 Perfil
                             </MenuItem>
-                            <MenuItem icon={<FaHistory />}>
+                            <MenuItem
+                                onClick={() => router.push('/minhasrapidinhas')}
+                                icon={<FaHistory />}
+                            >
                                 Minhas rapidinhas
                             </MenuItem>
                             <MenuItem icon={<FaPlus />}>

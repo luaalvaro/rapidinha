@@ -1,10 +1,9 @@
 import { Flex, Text, Center, Button, Grid, Stack, Skeleton, toast, useToast, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogCloseButton, AlertDialogBody, AlertDialogFooter, useDisclosure, } from '@chakra-ui/react'
 import { User } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
-import { Z_BEST_SPEED } from 'zlib'
 import useGlobal from '../store/globalStore'
 import { supabase } from '../utils/supabaseClient'
-import { Rapidinha } from './Rapidinhas'
+import { Rapidinha } from './RapidinhaById'
 
 interface CardRapidinhaProps {
     data: Rapidinha
@@ -19,6 +18,18 @@ interface PurchasedNumbersProps {
     user_id: string
 }
 
+interface PaymentOrder {
+    award: number,
+    created_at: string,
+    fee: number,
+    id: string,
+    rapidinha_id: number,
+    result_sorted_numbers: number,
+    total_money: number,
+    user_recived: boolean
+    winner_id: string,
+}
+
 const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
 
     const [purchasedNumbers, setPurchasedNumbers] = useState<PurchasedNumbersProps[] | null>(null)
@@ -27,6 +38,7 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
     const [loading, setLoading] = useState(false)
     const [modalAlertShowing, setModalAlertShowing] = useState(false)
     const { isOpen, onOpen, onClose } = useDisclosure()
+    const [paymentOrder, setPaymentOrder] = useState<PaymentOrder | null>(null)
 
     const toast = useToast()
     const global = useGlobal(state => state)
@@ -166,6 +178,25 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
         }
     }
 
+    const defineBackground = (num: string) => {
+        return data.result_sorted_numbers === Number(num) ? "gold" :
+            checkNumberPurchased(num)
+                ? checkNumberPurchasedIsMine(num)
+                    ? "orange" : "#25D985"
+                : chosenNumber === num
+                    ? "#44AFEC"
+                    : "#C4C4C4"
+    }
+
+    const checkIfUserIsWinner = () => {
+        const userId = user && user.id || 0
+
+        if (userId === 0)
+            return false
+
+        return data.winner_id === userId
+    }
+
     useEffect(() => {
         getPurchasedNumbers()
 
@@ -174,6 +205,30 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
             checkIsLogged()
         })
     }, [])
+
+    const getPaymentOrder = async (rapidinha_id: string) => {
+        try {
+            const { data, error } = await supabase
+                .from<PaymentOrder>('rapidinha_payments')
+                .select(`*`)
+                .eq('rapidinha_id', rapidinha_id)
+                .single()
+
+            if (error) console.error(error)
+
+            setPaymentOrder(data)
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    useEffect(() => {
+        console.log(!paymentOrder && data.status === 'completed')
+
+        if (!paymentOrder && data.status === 'completed' && user) {
+            getPaymentOrder(data.id)
+        }
+    }, [purchasedNumbers])
 
     useEffect(() => {
         checkIsLogged()
@@ -240,14 +295,7 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                                     width="30px"
                                     height="30px"
 
-                                    bg={
-                                        checkNumberPurchased(num)
-                                            ? checkNumberPurchasedIsMine(num)
-                                                ? "orange" : "#25D985"
-                                            : chosenNumber === num
-                                                ? "#44AFEC"
-                                                : "#C4C4C4"
-                                    }
+                                    bg={defineBackground(num)}
 
                                     color={
                                         checkNumberPurchased(num)
@@ -277,7 +325,7 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                     </Flex>
 
                     <Flex>
-                        {user &&
+                        {user && data.status === 'waiting' &&
                             <Button
                                 width="100%"
                                 bg={!chosenNumber ? '' : "#25D985"}
@@ -297,6 +345,19 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                                 {!chosenNumber ? 'Participe dessa rapidinha' : !user ? 'Faça login para participar' : 'Participar'}
                             </Button>
                         }
+
+                        {paymentOrder &&
+                            <Text width="100%" textAlign="center">
+                                {paymentOrder.user_recived
+                                    ? checkIfUserIsWinner()
+                                        ? "Você já recebeu este prêmio"
+                                        : "O ganhador já recebeu este prêmio"
+                                    : checkIfUserIsWinner()
+                                        ? "Clique para resgatar o seu prêmio"
+                                        : "O ganhador ainda não resgatou este prêmio"
+                                }
+                            </Text>
+                        }
                     </Flex>
                 </>
             }
@@ -309,7 +370,7 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                 rpdValue={data.ticket_value}
                 chosenNumber={chosenNumber}
             />
-        </Flex>
+        </Flex >
     )
 }
 
