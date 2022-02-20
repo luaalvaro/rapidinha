@@ -47,7 +47,7 @@ const Rapidinhas: React.FC = () => {
                 mb="20px"
                 fontWeight={600}
             >
-                Rapidinhas
+                Próximas rapidinhas
             </Text>
 
             <Flex

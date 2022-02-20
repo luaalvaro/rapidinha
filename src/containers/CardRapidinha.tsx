@@ -53,6 +53,19 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
         return true
     }
 
+    const checkNumberPurchasedIsMine = (num: string) => {
+        const response = purchasedNumbers
+            ?.filter(selectedNum => selectedNum.chosen_number === Number(num))
+
+        const userBet = response && response[0].user_id || ""
+        const userId = user && user.id || ""
+
+        if (userId === userBet)
+            return true
+
+        return false
+    }
+
     const getPurchasedNumbers = async () => {
         try {
             const { data: bets, error } = await supabase
@@ -215,7 +228,8 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
 
                                     bg={
                                         checkNumberPurchased(num)
-                                            ? "#25D985"
+                                            ? checkNumberPurchasedIsMine(num)
+                                                ? "#25D985" : "#25D98550"
                                             : chosenNumber === num
                                                 ? "#44AFEC"
                                                 : "#C4C4C4"
@@ -252,20 +266,23 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                         {user &&
                             <Button
                                 width="100%"
-                                bg="#25D985"
-
+                                bg={!chosenNumber ? '' : "#25D985"}
+                                variant={!chosenNumber ? 'link' : 'solid'}
                                 isLoading={loading}
 
                                 onClick={() => handlePurchaseTicket(Number(data.id))}
 
                                 _hover={{
-                                    background: '#20C578'
+                                    background: !chosenNumber ? '' : '#20C578'
                                 }}
+
                                 _active={{
-                                    background: '#20C578'
+                                    background: !chosenNumber ? '' : '#20C578'
                                 }}
+
+                                transition="all .5s ease-in-out"
                             >
-                                {!chosenNumber ? 'Selecione um número' : !user ? 'Faça login para participar' : 'Participar'}
+                                {!chosenNumber ? 'Faça uma rapidinha, escolha um número' : !user ? 'Faça login para participar' : 'Participar'}
                             </Button>
                         }
                     </Flex>
