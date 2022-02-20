@@ -36,8 +36,10 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
     ]
 
     const preSelectNumber = (num: string) => {
-        const isSelected = checkNumberPurchased(num)
 
+        if (!user) return
+
+        const isSelected = checkNumberPurchased(num)
         if (isSelected) return
 
         if (chosenNumber === num) {
@@ -165,6 +167,11 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
 
     useEffect(() => {
         getPurchasedNumbers()
+
+        supabase.auth.onAuthStateChange((_event, session) => {
+            console.log('checando user logged')
+            checkIsLogged()
+        })
     }, [])
 
     useEffect(() => {
@@ -180,7 +187,9 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
         >
 
             {!purchasedNumbers &&
-                <Stack width="100%">
+                <Stack
+                    width={["100%", "100%", "190px", "190px", "190px"]}
+                >
                     <Skeleton height='20px' />
                     <Skeleton height='20px' />
                     <Skeleton height='20px' />
@@ -256,8 +265,8 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                                     onClick={() => preSelectNumber(num)}
 
                                     _hover={{
-                                        background: checkNumberPurchased(num) ? '' : '#44AFEC',
-                                        color: checkNumberPurchased(num) ? '' : "#fff"
+                                        background: checkNumberPurchased(num) ? user ? '#44AFEC' : '' : '',
+                                        color: checkNumberPurchased(num) ? user ? '#fff' : '' : '',
                                     }}
                                 >
                                     {num}
@@ -283,10 +292,8 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                                 _active={{
                                     background: !chosenNumber ? '' : '#20C578'
                                 }}
-
-                                transition="all .5s ease-in-out"
                             >
-                                {!chosenNumber ? 'Faça uma rapidinha, escolha um número' : !user ? 'Faça login para participar' : 'Participar'}
+                                {!chosenNumber ? 'Participe dessa rapidinha' : !user ? 'Faça login para participar' : 'Participar'}
                             </Button>
                         }
                     </Flex>
