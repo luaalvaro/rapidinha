@@ -242,7 +242,7 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                                     bg={
                                         checkNumberPurchased(num)
                                             ? checkNumberPurchasedIsMine(num)
-                                                ? "#25D985" : "#25D98550"
+                                                ? "orange" : "#25D985"
                                             : chosenNumber === num
                                                 ? "#44AFEC"
                                                 : "#C4C4C4"
