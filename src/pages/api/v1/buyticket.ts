@@ -1,6 +1,7 @@
 import { NextApiHandler } from "next"
 import jwt from 'jsonwebtoken'
 import { createClient } from '@supabase/supabase-js'
+import { now } from "lodash"
 
 interface RapidinhaProps {
     id: number,
@@ -26,12 +27,13 @@ const handler: NextApiHandler = async (req, res) => {
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     const checkTokenIsValid = (token: string) => {
-        const JWT_SINGNATURE = process.env.JWT_SIGNATURE
 
+        const JWT_SINGNATURE = process.env.JWT_SIGNATURE
         if (!JWT_SINGNATURE)
             return res.status(400).json({ message: '30 JWT Broken' })
 
         try {
+            console.log('36 Verificando token')
             var decoded = jwt.verify(token, JWT_SINGNATURE);
 
             if (typeof decoded === 'string')
@@ -46,6 +48,8 @@ const handler: NextApiHandler = async (req, res) => {
 
     const getUserCurrency = async (id: string) => {
         try {
+            console.log('51 Pegando saldo do usuário')
+
             const { data, error } = await supabase
                 .from('profiles')
                 .select('currency')
@@ -62,6 +66,7 @@ const handler: NextApiHandler = async (req, res) => {
 
     const getAllBets = async (id_rapidinha: string) => {
         try {
+            console.log('69 Buscando todas as apostas')
             const { data, error } = await supabase
                 .from('rapidinha_bets')
                 .select('*')
@@ -75,6 +80,8 @@ const handler: NextApiHandler = async (req, res) => {
 
     const getRapidinha = async (id: number) => {
         try {
+            console.log('83 Buscando rapidinha a ser apostada')
+
             const { data, error } = await supabase
                 .from('rapidinhas')
                 .select('*')
@@ -88,6 +95,7 @@ const handler: NextApiHandler = async (req, res) => {
     }
 
     const checkNumberAvaliable = (number: number, bets: Bets[]) => {
+        console.log('98 Checando se número é válido')
 
         if (bets.length === 0)
             return true
@@ -100,9 +108,10 @@ const handler: NextApiHandler = async (req, res) => {
     }
 
     const checkIfUserHasTicket = (bets: Bets[], user_id: string) => {
+        console.log('Checando se o usuário já comprou nesta rapidinha')
 
         const filteredId = bets.filter(bet => bet.user_id === user_id)
-        if (filteredId.length !== 0)
+        if (filteredId.length > 1)
             return true
 
         return false
@@ -115,6 +124,7 @@ const handler: NextApiHandler = async (req, res) => {
         ticket_value: number,
         userCurrency: number
     ) => {
+        console.log('Iniciando compra do ticket')
 
         let newBet = null;
         let newProfile = null;
@@ -136,7 +146,6 @@ const handler: NextApiHandler = async (req, res) => {
 
         try {
             const newCurrency = userCurrency - ticket_value
-            console.log(newCurrency)
 
             const { data, error } = await supabase
                 .from('profiles')
@@ -158,6 +167,77 @@ const handler: NextApiHandler = async (req, res) => {
         }
     }
 
+    function getRandom(max: number) {
+        console.log('172 Gerando número aleatório')
+        return Math.floor(Math.random() * max + 1)
+    }
+
+    const getWinner = (bets: Bets[], sortedNumber: number) => {
+        console.log('177 Filtrando vencedor')
+        const winner = bets.filter(bet => bet.chosen_number === sortedNumber)
+        return winner
+    }
+
+    const setRapidinhaCompleted = async (id_rapidinha: string, sortedNumber: number, winner_id: string, sortedAt: Date) => {
+        console.log('183 Alterando status da rapidinha')
+
+        try {
+            const { data, error } = await supabase
+                .from('rapidinhas')
+                .update({
+                    status: 'completed',
+                    result_sorted_numbers: sortedNumber,
+                    winner_id: winner_id,
+                    sortedAt: sortedAt
+                })
+                .eq('id', id_rapidinha)
+                .single()
+
+            if (error) console.log(error)
+
+            console.log(data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const getSortedAndCreatePaymentOrder = async (rapidinha: any) => {
+        try {
+            console.log('207 criando ordem de pagamento')
+            const sortedNumber = getRandom(15)
+            const winner = getWinner(bets || [], sortedNumber)
+            const winner_id = winner[0].user_id
+            const sortedAt = new Date(Date.now())
+
+            console.log('Número sorteado', sortedNumber)
+            console.log('Winner id', winner_id)
+            console.log('Hora do sorteio', sortedAt)
+
+            const rapidinhaTotalMoney = rapidinha.qtd_num * rapidinha.ticket_value
+            const rapidinhaFeeMoney = rapidinhaTotalMoney * (rapidinha.fee / 100)
+            const rapidinhaAward = rapidinhaTotalMoney - rapidinhaFeeMoney
+            console.log('Resultado financeiro', rapidinhaTotalMoney, rapidinhaFeeMoney, rapidinhaAward)
+
+            const { data, error } = await supabase
+                .from('rapidinha_payments')
+                .insert({
+                    rapidinha_id: rapidinha.id,
+                    result_sorted_numbers: sortedNumber,
+                    winner_id: winner_id,
+                    total_money: rapidinhaTotalMoney,
+                    fee: rapidinhaFeeMoney,
+                    award: rapidinhaAward
+                })
+                .single()
+
+            if (error) console.log(error)
+
+            setRapidinhaCompleted(rapidinha.id, sortedNumber, winner_id, sortedAt)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     const token = req.headers.authorization?.split('Bearer ')[1]
 
     if (!token)
@@ -175,6 +255,9 @@ const handler: NextApiHandler = async (req, res) => {
     const rapidinha = await getRapidinha(id_rapidinha)
     const ticket_value = rapidinha.ticket_value || 0
 
+    if (rapidinha.status === 'completed')
+        return res.status(400).json({ message: '180 - Rapidinha finalizada' })
+
     if (chosen_number < 1 || chosen_number > rapidinha.qtd_num)
         return res.status(400).json({ message: '179 - Número inválido' })
 
@@ -184,22 +267,16 @@ const handler: NextApiHandler = async (req, res) => {
     const bets = await getAllBets(rapidinha.id)
     const isAvaliable = checkNumberAvaliable(chosen_number, bets || [])
 
+    const qtdTicketsAcctually = bets && bets.length || 987987
+    if (qtdTicketsAcctually === rapidinha.qtd_num)
+        return res.status(400).json({ message: '192 - Esta rapidinha já atingiu o número máximo de apostas' })
+
     if (!isAvaliable)
-        return res.status(400).json({ message: '188 - Número já selecionado por outro usuário' })
+        return res.status(400).json({ message: '195 - Número já selecionado por outro usuário' })
 
     const hasTicket = checkIfUserHasTicket(bets || [], user_id)
-
     if (hasTicket)
-        return res.status(400).json({ message: '193 - Permitido apenas 01 ticket por usuário' })
-
-    // Usuário tem dinheiro pra apostar
-    // Número está válido
-    // Token é válido
-
-    // Próximos passos
-
-    // Criar uma TRANSAÇÃO DE COMPRA (rapidinha_bets)
-    // e remover o valor referente da conta do usuário
+        return res.status(400).json({ message: '193 - Permitido apenas 02 ticket por usuário' })
 
     const newPurchase = await handleNewPurchaseTicket(
         id_rapidinha,
@@ -208,6 +285,10 @@ const handler: NextApiHandler = async (req, res) => {
         ticket_value,
         userCurrency,
     )
+
+    if (qtdTicketsAcctually + 1 === rapidinha.qtd_num) {
+        getSortedAndCreatePaymentOrder(rapidinha)
+    }
 
     res.status(200).json(newPurchase)
 }
