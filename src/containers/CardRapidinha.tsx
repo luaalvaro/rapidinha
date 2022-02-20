@@ -40,7 +40,11 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
 
         if (isSelected) return
 
-        setChosenNumber(num)
+        if (chosenNumber === num) {
+            setChosenNumber(null)
+        } else {
+            setChosenNumber(num)
+        }
     }
 
     const checkNumberPurchased = (num: string) => {
@@ -270,7 +274,7 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                                 variant={!chosenNumber ? 'link' : 'solid'}
                                 isLoading={loading}
 
-                                onClick={() => handlePurchaseTicket(Number(data.id))}
+                                onClick={!chosenNumber ? () => { } : () => handlePurchaseTicket(Number(data.id))}
 
                                 _hover={{
                                     background: !chosenNumber ? '' : '#20C578'
