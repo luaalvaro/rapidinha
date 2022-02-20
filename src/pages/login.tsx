@@ -16,47 +16,47 @@ const Login: NextPage = () => {
     const [loading, setLoading] = useState(false)
 
     const handleSubmit = async () => {
-        // try {
-        //     setLoading(true)
-        //     if (!email || !password)
-        //         throw "Email ou senha não pode ser vazio"
+        try {
+            setLoading(true)
+            if (!email || !password)
+                throw "Email ou senha não pode ser vazio"
 
-        //     const { user, error } = await supabase
-        //         .auth
-        //         .signIn({
-        //             email: email,
-        //             password: password,
-        //         })
+            const { user, error } = await supabase
+                .auth
+                .signIn({
+                    email: email,
+                    password: password,
+                })
 
-        //     if (error?.message === "Invalid login credentials")
-        //         return toast({
-        //             title: 'Email ou senha incorreto',
-        //             status: 'error',
-        //             duration: 9000,
-        //             isClosable: true,
-        //         })
+            if (error?.message === "Invalid login credentials")
+                return toast({
+                    title: 'Email ou senha incorreto',
+                    status: 'error',
+                    duration: 9000,
+                    isClosable: true,
+                })
 
-        //     return router.push('/')
-        // } catch (error) {
-        //     console.error(error)
-        //     toast({
-        //         title: 'Algo deu errado',
-        //         status: 'error',
-        //         duration: 9000,
-        //         isClosable: true,
-        //     })
-        // } finally {
-        //     setLoading(false)
-        // }
-
-        const { user, error } = await supabase
-            .auth
-            .signUp({
-                email: 'paulosolposto5@gmail.com',
-                password: 'solposto55paulo',
+            return router.push('/')
+        } catch (error) {
+            console.error(error)
+            toast({
+                title: 'Algo deu errado',
+                status: 'error',
+                duration: 9000,
+                isClosable: true,
             })
+        } finally {
+            setLoading(false)
+        }
 
-        console.log(user)
+        // const { user, error } = await supabase
+        //     .auth
+        //     .signUp({
+        //         email: 'paulosolposto5@gmail.com',
+        //         password: 'solposto55paulo',
+        //     })
+
+        // console.log(user)
     }
 
     return (
