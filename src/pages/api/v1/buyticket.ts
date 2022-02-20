@@ -22,6 +22,7 @@ interface Bets {
 }
 const handler: NextApiHandler = async (req, res) => {
 
+    console.log('---------------------------------------')
     const supabaseUrl = 'https://rvdmmpwydcbhgnenqyds.supabase.co'
     const supabaseKey = process.env.MASTER_SUPABASE_KEY || ''
     const supabase = createClient(supabaseUrl, supabaseKey)
@@ -101,6 +102,7 @@ const handler: NextApiHandler = async (req, res) => {
             return true
 
         const filtered = bets.filter(bet => bet.chosen_number === number)
+
         if (filtered.length === 0)
             return true
 
@@ -265,14 +267,14 @@ const handler: NextApiHandler = async (req, res) => {
         return res.status(400).json({ message: '182 - Saldo insuficiente' })
 
     const bets = await getAllBets(rapidinha.id)
-    const isAvaliable = checkNumberAvaliable(chosen_number, bets || [])
+    const isAvaliable = checkNumberAvaliable(Number(chosen_number), bets || [])
+
+    if (!isAvaliable)
+        return res.status(400).json({ message: '195 - Número já selecionado por outro usuário' })
 
     const qtdTicketsAcctually = bets && bets.length || 987987
     if (qtdTicketsAcctually === rapidinha.qtd_num)
         return res.status(400).json({ message: '192 - Esta rapidinha já atingiu o número máximo de apostas' })
-
-    if (!isAvaliable)
-        return res.status(400).json({ message: '195 - Número já selecionado por outro usuário' })
 
     // const hasTicket = checkIfUserHasTicket(bets || [], user_id)
     // if (hasTicket)
