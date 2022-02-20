@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { supabase } from '../utils/supabaseClient'
-import { FaBars, FaUser } from 'react-icons/fa'
+import { FaBars, FaHistory, FaPlus, FaUser } from 'react-icons/fa'
 import { IoMdExit } from 'react-icons/io'
 import useGlobal from '../store/globalStore'
 
@@ -104,20 +104,6 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                     align="center"
                     gridGap="25px"
                 >
-                    <Button
-                        color="#fff"
-                        background="#25D985"
-
-                        _hover={{
-                            background: '#20C578'
-                        }}
-                        _active={{
-                            background: '#20C578'
-                        }}
-                    >
-                        DEPOSITAR
-                    </Button>
-
                     <Flex
                         borderRadius="5px"
                         color="#fff"
@@ -146,11 +132,21 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                             }}
                         />
                         <MenuList>
-                            <MenuItem>
+                            <Text
+                                pl="15px"
+                                fontWeight={500}
+                                my="5px"
+                            >
                                 Olá, {user.firstName}
-                            </MenuItem>
+                            </Text>
                             <MenuItem icon={<FaUser />}>
                                 Perfil
+                            </MenuItem>
+                            <MenuItem icon={<FaHistory />}>
+                                Minhas rapidinhas
+                            </MenuItem>
+                            <MenuItem icon={<FaPlus />}>
+                                Depositar
                             </MenuItem>
                             <MenuItem
                                 onClick={handleLogout}
