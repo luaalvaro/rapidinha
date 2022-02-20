@@ -126,7 +126,7 @@ const handler: NextApiHandler = async (req, res) => {
         ticket_value: number,
         userCurrency: number
     ) => {
-        console.log('Iniciando compra do ticket')
+        console.log('129 Iniciando compra do ticket')
 
         let newBet = null;
         let newProfile = null;
@@ -162,7 +162,7 @@ const handler: NextApiHandler = async (req, res) => {
             return res.status(400).json({ message: '141 Error at new rapidinha' })
         }
 
-        console.log('Aposta feita com sucesso')
+        console.log('165 Aposta feita com sucesso')
         return {
             newBet,
             newProfile
@@ -198,27 +198,27 @@ const handler: NextApiHandler = async (req, res) => {
             if (error) console.log(error)
 
             console.log(data)
+            return true
         } catch (error) {
             console.log(error)
+            return false
         }
     }
 
     const getSortedAndCreatePaymentOrder = async (rapidinha: any) => {
         try {
-            console.log('207 criando ordem de pagamento')
             const sortedNumber = getRandom(15)
+
+            console.log('212 Pegando vencedor e informaçoes de pagamento')
             const winner = getWinner(bets || [], sortedNumber)
             const winner_id = winner[0].user_id
             const sortedAt = new Date(Date.now())
-
-            console.log('Número sorteado', sortedNumber)
-            console.log('Winner id', winner_id)
-            console.log('Hora do sorteio', sortedAt)
-
             const rapidinhaTotalMoney = rapidinha.qtd_num * rapidinha.ticket_value
             const rapidinhaFeeMoney = rapidinhaTotalMoney * (rapidinha.fee / 100)
             const rapidinhaAward = rapidinhaTotalMoney - rapidinhaFeeMoney
-            console.log('Resultado financeiro', rapidinhaTotalMoney, rapidinhaFeeMoney, rapidinhaAward)
+
+            console.log('217 Número sorteado', sortedNumber)
+            console.log('218 Criando ordem de pagamento para o vencedor')
 
             const { data, error } = await supabase
                 .from('rapidinha_payments')
@@ -234,7 +234,13 @@ const handler: NextApiHandler = async (req, res) => {
 
             if (error) console.log(error)
 
-            setRapidinhaCompleted(rapidinha.id, sortedNumber, winner_id, sortedAt)
+            console.log('237 Ordem de pagamento criada')
+            const response = await setRapidinhaCompleted(rapidinha.id, sortedNumber, winner_id, sortedAt)
+
+            if (response)
+                return true
+
+            return false
         } catch (error) {
             console.log(error)
         }
@@ -289,10 +295,12 @@ const handler: NextApiHandler = async (req, res) => {
     )
 
     if (qtdTicketsAcctually + 1 === rapidinha.qtd_num) {
-        getSortedAndCreatePaymentOrder(rapidinha)
+        const response = await getSortedAndCreatePaymentOrder(rapidinha)
+
+        console.log('Sorteio realizado com sucesso?', response)
     }
 
-    res.status(200).json(newPurchase)
+    return res.status(200).json(newPurchase)
 }
 
 export default handler
