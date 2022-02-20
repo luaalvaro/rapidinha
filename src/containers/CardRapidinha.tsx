@@ -1,4 +1,4 @@
-import { Flex, Text, Center, Button, Grid, Stack, Skeleton, toast, useToast, } from '@chakra-ui/react'
+import { Flex, Text, Center, Button, Grid, Stack, Skeleton, toast, useToast, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogCloseButton, AlertDialogBody, AlertDialogFooter, useDisclosure, } from '@chakra-ui/react'
 import { User } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
 import { Z_BEST_SPEED } from 'zlib'
@@ -25,6 +25,8 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
     const [chosenNumber, setChosenNumber] = useState<string | null>(null)
     const [user, setUser] = useState<User | null>(null)
     const [loading, setLoading] = useState(false)
+    const [modalAlertShowing, setModalAlertShowing] = useState(false)
+    const { isOpen, onOpen, onClose } = useDisclosure()
 
     const toast = useToast()
     const global = useGlobal(state => state)
@@ -114,7 +116,6 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                 status: 'error',
                 duration: 5000
             })
-
 
         try {
             setLoading(true)
@@ -283,7 +284,7 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                                 variant={!chosenNumber ? 'link' : 'solid'}
                                 isLoading={loading}
 
-                                onClick={!chosenNumber ? () => { } : () => handlePurchaseTicket(Number(data.id))}
+                                onClick={!chosenNumber ? () => { } : onOpen}
 
                                 _hover={{
                                     background: !chosenNumber ? '' : '#20C578'
@@ -299,8 +300,69 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                     </Flex>
                 </>
             }
-        </Flex >
+            <AlertConfirm
+                isOpen={isOpen}
+                onOpen={onOpen}
+                onClose={onClose}
+                callback={() => handlePurchaseTicket(Number(data.id))}
+                rpdId={data.id}
+                rpdValue={data.ticket_value}
+                chosenNumber={chosenNumber}
+            />
+        </Flex>
     )
 }
 
 export default CardRapidinha
+
+interface AlertConfirmProps {
+    isOpen: boolean,
+    onOpen: () => void,
+    onClose: () => void,
+    callback: () => void,
+    rpdId: string,
+    rpdValue: number,
+    chosenNumber: string | null,
+}
+
+const AlertConfirm: React.FC<AlertConfirmProps> = ({
+    isOpen,
+    onOpen,
+    onClose,
+    callback,
+    rpdId,
+    rpdValue,
+    chosenNumber
+}) => {
+
+    return (
+        <AlertDialog
+            motionPreset='slideInBottom'
+            leastDestructiveRef={undefined}
+            onClose={onClose}
+            isOpen={isOpen}
+            isCentered
+        >
+            <AlertDialogOverlay />
+
+            <AlertDialogContent>
+                <AlertDialogHeader>Confirmar rapidinha</AlertDialogHeader>
+                <AlertDialogCloseButton onClick={onClose} />
+                <AlertDialogBody>
+                    Voce deseja participar da rapidinha #00{rpdId}? O número <b>{chosenNumber}</b> custa <b>R$ {rpdValue}</b>.
+                </AlertDialogBody>
+                <AlertDialogFooter>
+                    <Button colorScheme='red' onClick={onClose}>
+                        Não
+                    </Button>
+                    <Button ml={3} onClick={() => {
+                        callback()
+                        onClose()
+                    }}>
+                        Confirmar
+                    </Button>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    )
+}
