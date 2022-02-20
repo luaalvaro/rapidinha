@@ -293,6 +293,29 @@ const handler: NextApiHandler = async (req, res) => {
         userCurrency,
     )
 
+    if (qtdTicketsAcctually === 14) {
+        //Criar nova rapidinha automaticamente
+        try {
+            const { data, error } = await supabase
+                .from('rapidinhas')
+                .insert({
+                    qtd_num: 15,
+                    fee: 30,
+                    ticket_value: 2,
+                    award: 21,
+                    status: 'waiting',
+                    qtd_winners: 1
+                })
+
+            if (error) console.error(error)
+
+            console.log('Nova rapidinha criada com sucesso')
+            console.log(data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     if (qtdTicketsAcctually + 1 === rapidinha.qtd_num) {
         const response = await getSortedAndCreatePaymentOrder(rapidinha)
 
