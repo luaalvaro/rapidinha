@@ -1,7 +1,6 @@
 import { NextApiHandler } from "next"
 import jwt from 'jsonwebtoken'
 import { createClient } from '@supabase/supabase-js'
-import { now } from "lodash"
 
 interface RapidinhaProps {
     id: number,

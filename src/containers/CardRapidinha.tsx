@@ -63,6 +63,12 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
         }
     }
 
+    const awardRecivedUpdateOrder = () => {
+        if (paymentOrder) {
+            setPaymentOrder({ ...paymentOrder, user_recived: true })
+        }
+    }
+
     const checkNumberPurchased = (num: string) => {
         const response = purchasedNumbers
             ?.filter(selectedNum => selectedNum.chosen_number === Number(num))
@@ -182,7 +188,7 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
         return data.result_sorted_numbers === Number(num) ? "gold" :
             checkNumberPurchased(num)
                 ? checkNumberPurchasedIsMine(num)
-                    ? "orange" : "#25D985"
+                    ? "#25D985" : "orange"
                 : chosenNumber === num
                     ? "#44AFEC"
                     : "#C4C4C4"
@@ -195,6 +201,60 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
             return false
 
         return data.winner_id === userId
+    }
+
+    const handleGetMyAward = async (id_rapidinha: string) => {
+
+        const session = supabase.auth.session()
+
+        if (!session)
+            return toast({
+                title: 'Faça login para participar',
+                status: 'error',
+                duration: 5000
+            })
+
+        try {
+            setLoading(true)
+            const response = await fetch('/api/v1/getpayment', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`,
+                    'Content-type': 'Application/json'
+                },
+                body: JSON.stringify({
+                    rapidinha_id: id_rapidinha,
+                })
+            })
+
+            const data = await response.json()
+
+            if (response.status === 200) {
+                //Deu certo, usuário recebeu o valor
+                global.toggleReloadProfile()
+                awardRecivedUpdateOrder()
+                toast({
+                    title: `Foi creditado ${data.award} na sua conta!`,
+                    status: 'success',
+                    duration: 9000
+                })
+            }
+
+            if (response.status !== 200) {
+                //Deu certo, usuário recebeu o valor
+                global.toggleReloadProfile()
+
+                toast({
+                    title: `Algo deu errado`,
+                    status: 'error',
+                    duration: 9000
+                })
+            }
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setLoading(false)
+        }
     }
 
     useEffect(() => {
@@ -347,16 +407,32 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                         }
 
                         {paymentOrder &&
-                            <Text width="100%" textAlign="center">
+                            <>
                                 {paymentOrder.user_recived
                                     ? checkIfUserIsWinner()
                                         ? "Você já recebeu este prêmio"
                                         : "O ganhador já recebeu este prêmio"
                                     : checkIfUserIsWinner()
-                                        ? "Clique para resgatar o seu prêmio"
+                                        ? <Button
+                                            bg="#25D985"
+                                            mx="auto"
+
+                                            isLoading={loading}
+                                            onClick={() => handleGetMyAward(data.id)}
+
+                                            _hover={{
+                                                background: '#20C578'
+                                            }}
+
+                                            _active={{
+                                                background: '#20C578'
+                                            }}
+                                        >
+                                            Clique aqui para resgatar seu prêmio
+                                        </Button>
                                         : "O ganhador ainda não resgatou este prêmio"
                                 }
-                            </Text>
+                            </>
                         }
                     </Flex>
                 </>
