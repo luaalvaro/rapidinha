@@ -44,26 +44,26 @@ const Rapidinhas: React.FC = () => {
                 mb="20px"
                 height="40px"
                 align="center"
-                px={["20px", "20px", "0", "0", "0"]}
                 justify="space-between"
+                flexWrap="wrap"
             >
                 <Center
-                    gridGap="10px"
+                    gridGap="5px"
                 >
                     <Box w={5} h={5} bg="#FFF" />
-                    <Text color="#FFF">Disponível</Text>
+                    <Text color="#FFF" fontSize={["14px", "16px", "16px", "16px"]}>Disponível</Text>
                 </Center>
                 <Center
                     gridGap="10px"
                 >
                     <Box w={5} h={5} bg="Orange" />
-                    <Text color="#FFF">Indisponível</Text>
+                    <Text color="#FFF" fontSize={["14px", "16px", "16px", "16px"]}>Indisponível</Text>
                 </Center>
                 <Center
                     gridGap="10px"
                 >
                     <Box w={5} h={5} bg="#25D985" />
-                    <Text color="#FFF">Seu número</Text>
+                    <Text color="#FFF" fontSize={["14px", "16px", "16px", "16px"]}>Seu número</Text>
                 </Center>
             </Flex>
 
