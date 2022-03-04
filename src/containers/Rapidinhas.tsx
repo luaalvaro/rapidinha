@@ -1,4 +1,4 @@
-import { Button, Center, Flex, Skeleton, Stack, Text } from '@chakra-ui/react'
+import { Box, Button, Center, Flex, Skeleton, Stack, Text } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { supabase } from '../utils/supabaseClient'
 import CardRapidinha from './CardRapidinha'
@@ -31,13 +31,41 @@ const Rapidinhas: React.FC = () => {
             direction="column"
         >
             <Text
-                fontSize="15px"
+                fontSize="17px"
                 color="#fff"
                 mb="20px"
                 fontWeight={600}
             >
                 Próximas rapidinhas
             </Text>
+
+            <Flex
+                maxWidth="500px"
+                mb="20px"
+                height="40px"
+                align="center"
+                px={["20px", "20px", "0", "0", "0"]}
+                justify="space-between"
+            >
+                <Center
+                    gridGap="10px"
+                >
+                    <Box w={5} h={5} bg="#FFF" />
+                    <Text color="#FFF">Disponível</Text>
+                </Center>
+                <Center
+                    gridGap="10px"
+                >
+                    <Box w={5} h={5} bg="Orange" />
+                    <Text color="#FFF">Indisponível</Text>
+                </Center>
+                <Center
+                    gridGap="10px"
+                >
+                    <Box w={5} h={5} bg="#25D985" />
+                    <Text color="#FFF">Seu número</Text>
+                </Center>
+            </Flex>
 
             <Flex
                 gridGap="15px"

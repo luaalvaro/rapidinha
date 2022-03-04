@@ -188,10 +188,10 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
         return data.result_sorted_numbers === Number(num) ? "gold" :
             checkNumberPurchased(num)
                 ? checkNumberPurchasedIsMine(num)
-                    ? "#25D985" : "orange"
+                    ? "#25D985" : "#FFA500"
                 : chosenNumber === num
                     ? "#44AFEC"
-                    : "#C4C4C4"
+                    : "#FFF"
     }
 
     const checkIfUserIsWinner = () => {
@@ -402,7 +402,7 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                                     background: !chosenNumber ? '' : '#20C578'
                                 }}
                             >
-                                {!chosenNumber ? 'Participe dessa rapidinha' : !user ? 'Faça login para participar' : 'Participar'}
+                                {!chosenNumber ? 'Escolha um número e participe' : !user ? 'Faça login para participar' : 'Participar'}
                             </Button>
                         }
 
