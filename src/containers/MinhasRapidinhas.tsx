@@ -35,7 +35,7 @@ const MinhasRapidinhas = () => {
 
             setRapidinhaBets(rapidinha_bets)
         } catch (error) {
-            console.error(error)
+            console.log(error)
         }
     }
 

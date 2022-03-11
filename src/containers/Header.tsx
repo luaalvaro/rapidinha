@@ -1,10 +1,10 @@
-import { Flex, Button, Text, Menu, MenuButton, MenuList, MenuItem, IconButton } from '@chakra-ui/react'
+import { Flex, Button, Text, Menu, MenuButton, MenuList, MenuItem, IconButton, Center } from '@chakra-ui/react'
 import { User } from '@supabase/supabase-js'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { supabase } from '../utils/supabaseClient'
-import { FaBars, FaHistory, FaPlus, FaUser } from 'react-icons/fa'
+import { FaBars, FaBell, FaHistory, FaPlus, FaUser } from 'react-icons/fa'
 import { IoMdExit } from 'react-icons/io'
 import useGlobal from '../store/globalStore'
 
@@ -22,10 +22,19 @@ interface Profiles {
     updatedAt: string
 }
 
+interface Notification {
+    body: string,
+    created_at: string,
+    id: string,
+    read: boolean,
+    title: string,
+    user_id: string,
+}
 const Header: React.FC<HeaderProps> = ({ variant }) => {
 
     const router = useRouter()
     const [user, setUser] = useState<Profiles | null>(null)
+    const [notifications, setNotifications] = useState<Notification[] | null>(null)
     const global = useGlobal(state => state)
 
     const getUserProfile = async () => {
@@ -37,13 +46,48 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
 
             setUser(data)
         } catch (error) {
-            console.error(error)
+            console.log(error)
+        }
+    }
+
+    const getInboxNotifications = async () => {
+        try {
+            const { data, error } = await supabase
+                .from<Notification>('notifications')
+                .select('*')
+                .order("created_at", { ascending: false })
+
+            console.log(data)
+            setNotifications(data)
+        } catch (error) {
+            console.log(error)
         }
     }
 
     const handleLogout = () => {
         supabase.auth.signOut()
         setUser(null)
+    }
+
+    const convertDataShortView = (date: string) => {
+        let newDate: any = date.split('T')[0]
+        newDate = newDate.split('-')
+        newDate = `${newDate[2]}/${newDate[1]}`
+
+        return newDate
+    }
+
+    const numberOfNotificationsNotRead = (notifications: Notification[]) => {
+        const result = notifications.reduce((acc, cur) => {
+            if (cur.read === false)
+                return acc + 1
+
+            return acc
+        }, 0)
+
+        console.log(result)
+
+        return result
     }
 
     useEffect(() => {
@@ -53,6 +97,10 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
             getUserProfile()
         }
     }, [global.reloadProfile])
+
+    useEffect(() => {
+        getInboxNotifications()
+    }, [])
 
     return (
         <Flex
@@ -106,6 +154,90 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                     align="center"
                     gridGap="25px"
                 >
+                    <Menu>
+                        <Flex
+                            position="relative"
+                        >
+                            <MenuButton
+                                color="#fff"
+                                as={IconButton}
+                                aria-label='Options'
+                                icon={<FaBell />}
+                                variant='outline'
+
+                                _hover={{
+                                    background: 'transparent'
+                                }}
+
+                                _active={{
+                                    background: 'transparent'
+                                }}
+                            />
+                            {notifications &&
+                                <Center
+                                    position="absolute"
+                                    borderRadius="100%"
+                                    background="red"
+                                    width="20px"
+                                    height="20px"
+                                    color="#fff"
+                                    fontWeight={700}
+                                    fontSize={10}
+                                    top={6}
+                                    left={7}
+                                >
+                                    {numberOfNotificationsNotRead(notifications)}
+                                </Center>
+                            }
+                        </Flex>
+                        <MenuList
+                            px="10px"
+                        >
+                            {notifications && notifications.map((mail, index) => (
+                                <Flex
+                                    key={index}
+                                    cursor="pointer"
+                                    gridGap="50px"
+                                    py="10px"
+                                    borderBottom="1px solid rgba(0,0,0,0.1)"
+                                    justify="space-between"
+
+                                    onClick={() => router.push(`/notificacoes`)}
+                                >
+                                    <Text
+                                        fontWeight={mail.read ? 400 : 700}
+                                    >
+                                        {mail.title}
+                                    </Text>
+                                    <Text
+                                    >
+                                        {convertDataShortView(mail.created_at)}
+                                    </Text>
+                                </Flex>
+                            ))}
+
+                            {!notifications &&
+                                <Flex
+                                    cursor="pointer"
+                                    gridGap="50px"
+                                    py="10px"
+                                    borderBottom="1px solid rgba(0,0,0,0.1)"
+                                    justify="space-between"
+                                >
+                                    <Text
+                                        fontWeight={700}
+                                    >
+                                        Nada por aqui
+                                    </Text>
+                                    <Text
+                                    >
+                                        :D
+                                    </Text>
+                                </Flex>
+                            }
+                        </MenuList>
+                    </Menu>
+
                     <Flex
                         borderRadius="5px"
                         color="#fff"
