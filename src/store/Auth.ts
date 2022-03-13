@@ -7,6 +7,7 @@ interface useAuthProps {
     setSession: (newSession: Session) => void,
     userDetails: Profiles | null,
     setUserDetails: (newUserDetails: any) => void,
+    logout: () => void,
 }
 
 const useAuth = create<useAuthProps>(set => ({
@@ -14,6 +15,7 @@ const useAuth = create<useAuthProps>(set => ({
     setSession: (newSession: Session) => set(state => ({ session: newSession })),
     userDetails: null,
     setUserDetails: (newUserDetails: Profiles) => set(state => ({ userDetails: newUserDetails })),
+    logout: () => set(state => ({ session: null }))
 }))
 
 export default useAuth

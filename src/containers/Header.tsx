@@ -53,6 +53,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
 
     const handleLogout = () => {
         supabase.auth.signOut()
+        Auth.logout()
     }
 
     const convertDataShortView = (date: string) => {
@@ -70,8 +71,6 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
 
             return acc
         }, 0)
-
-        console.log(result)
 
         return result
     }
@@ -112,6 +111,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                     </Button>
 
                     <Button
+                        display="none"
                         color="#fff"
                         background="#25D985"
 
