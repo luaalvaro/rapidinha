@@ -7,6 +7,7 @@ import { supabase } from '../utils/supabaseClient'
 import { FaBars, FaBell, FaHistory, FaPlus, FaUser } from 'react-icons/fa'
 import { IoMdExit } from 'react-icons/io'
 import useGlobal from '../store/globalStore'
+import useAuth from '../store/Auth'
 
 interface HeaderProps {
     variant?: string,
@@ -32,23 +33,9 @@ interface Notification {
 }
 const Header: React.FC<HeaderProps> = ({ variant }) => {
 
+    const Auth = useAuth(state => state)
     const router = useRouter()
-    const [user, setUser] = useState<Profiles | null>(null)
     const [notifications, setNotifications] = useState<Notification[] | null>(null)
-    const global = useGlobal(state => state)
-
-    const getUserProfile = async () => {
-        try {
-            const { data, error } = await supabase
-                .from<Profiles>('profiles')
-                .select('*')
-                .single()
-
-            setUser(data)
-        } catch (error) {
-            console.log(error)
-        }
-    }
 
     const getInboxNotifications = async () => {
         try {
@@ -66,7 +53,6 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
 
     const handleLogout = () => {
         supabase.auth.signOut()
-        setUser(null)
     }
 
     const convertDataShortView = (date: string) => {
@@ -91,14 +77,6 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
     }
 
     useEffect(() => {
-        const userSupabase = supabase.auth.user()
-
-        if (userSupabase) {
-            getUserProfile()
-        }
-    }, [global.reloadProfile])
-
-    useEffect(() => {
         getInboxNotifications()
     }, [])
 
@@ -119,7 +97,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                 <Image src="/logo.svg" alt="logo" width={85} height={29} priority />
             </Flex>
 
-            {!user &&
+            {!Auth.userDetails &&
                 <Flex
                     align="center"
                     gridGap="20px"
@@ -149,7 +127,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                 </Flex>
             }
 
-            {user &&
+            {Auth.userDetails &&
                 <Flex
                     align="center"
                     gridGap="25px"
@@ -173,7 +151,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                                     background: 'transparent'
                                 }}
                             />
-                            {notifications &&
+                            {notifications && numberOfNotificationsNotRead(notifications) !== 0 &&
                                 <Center
                                     position="absolute"
                                     borderRadius="100%"
@@ -246,7 +224,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                         px="12px"
                         border="1px solid rgba(255,255,255,0.5)"
                     >
-                        <Text width="max-content">R$ {user.currency}</Text>
+                        <Text width="max-content">R$ {Auth.userDetails.currency}</Text>
                     </Flex>
 
                     <Menu>
@@ -271,7 +249,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                                 fontWeight={500}
                                 my="5px"
                             >
-                                Olá, {user.firstName}
+                                Olá, {Auth.userDetails.firstName}
                             </Text>
                             <MenuItem icon={<FaUser />}>
                                 Perfil

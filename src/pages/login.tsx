@@ -1,7 +1,7 @@
 import { NextPage } from 'next'
 import { Button, Flex, FormControl, Link as A, FormLabel, Input, Text, useToast } from '@chakra-ui/react'
 import Link from 'next/link'
-import Container from '../components/Container'
+import AuthProvider from '../components/AuthProvider'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
@@ -60,7 +60,7 @@ const Login: NextPage = () => {
     }
 
     return (
-        <Container>
+        <AuthProvider>
             <Flex
                 width="100%"
                 height="60px"
@@ -186,7 +186,7 @@ const Login: NextPage = () => {
                     Entrar
                 </Button>
             </Flex>
-        </Container>
+        </AuthProvider>
     )
 }
 
