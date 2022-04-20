@@ -22,9 +22,11 @@ interface Bets {
 const handler: NextApiHandler = async (req, res) => {
 
     console.log('---------------------------------------')
-    const supabaseUrl = 'https://rvdmmpwydcbhgnenqyds.supabase.co'
+    const supabaseUrl = process.env.NEXT_PUBLIC_API_URL || ''
     const supabaseKey = process.env.MASTER_SUPABASE_KEY || ''
     const supabase = createClient(supabaseUrl, supabaseKey)
+
+    let currencyRefreshed: null | number = null
 
     const checkTokenIsValid = (token: string) => {
 
@@ -146,12 +148,12 @@ const handler: NextApiHandler = async (req, res) => {
         }
 
         try {
-            const newCurrency = userCurrency - ticket_value
+            currencyRefreshed = userCurrency - ticket_value
 
             const { data, error } = await supabase
                 .from('profiles')
                 .update({
-                    currency: newCurrency
+                    currency: currencyRefreshed
                 })
                 .eq('id', user_id)
 
@@ -196,7 +198,6 @@ const handler: NextApiHandler = async (req, res) => {
 
             if (error) console.log(error)
 
-            console.log(data)
             return true
         } catch (error) {
             console.log(error)
@@ -219,6 +220,18 @@ const handler: NextApiHandler = async (req, res) => {
             console.log('217 Número sorteado', sortedNumber)
             console.log('218 Criando ordem de pagamento para o vencedor')
 
+            if (!currencyRefreshed)
+                throw 'Currency not refreshed'
+
+            // Adicionar saldo na conta do vencedor
+            const { data: dataAddCash, error: errorAddCash } = await supabase
+                .from('profiles')
+                .update({
+                    currency: currencyRefreshed + rapidinhaAward
+                })
+                .eq('id', winner_id)
+
+
             const { data, error } = await supabase
                 .from('rapidinha_payments')
                 .insert({
@@ -227,13 +240,25 @@ const handler: NextApiHandler = async (req, res) => {
                     winner_id: winner_id,
                     total_money: rapidinhaTotalMoney,
                     fee: rapidinhaFeeMoney,
-                    award: rapidinhaAward
+                    award: rapidinhaAward,
+                    user_recived: true,
                 })
                 .single()
 
             if (error) console.log(error)
 
-            console.log('237 Ordem de pagamento criada')
+            console.log('237 Usuário recebeu o premio e ordem de pagamento criada')
+
+            const { data: dataNewNotification, error: errorNewNotification } = await supabase
+                .from('notifications')
+                .insert({
+                    title: 'Parabéns! Seu número foi sorteado',
+                    body: `Você ganhou R$ ${rapidinhaAward} na rapidinha ${rapidinha.id},
+                    e o valor já foi creditado na sua conta!`,
+                    user_id: winner_id,
+                    read: false,
+                })
+
             const response = await setRapidinhaCompleted(rapidinha.id, sortedNumber, winner_id, sortedAt)
 
             if (response)
@@ -281,10 +306,6 @@ const handler: NextApiHandler = async (req, res) => {
     if (qtdTicketsAcctually === rapidinha.qtd_num)
         return res.status(400).json({ message: '192 - Esta rapidinha já atingiu o número máximo de apostas' })
 
-    // const hasTicket = checkIfUserHasTicket(bets || [], user_id)
-    // if (hasTicket)
-    //     return res.status(400).json({ message: '193 - Permitido apenas 02 ticket por usuário' })
-
     const newPurchase = await handleNewPurchaseTicket(
         id_rapidinha,
         user_id,
@@ -309,8 +330,7 @@ const handler: NextApiHandler = async (req, res) => {
 
             if (error) console.error(error)
 
-            console.log('Nova rapidinha criada com sucesso')
-            console.log(data)
+            console.log('333 Nova rapidinha criada com sucesso')
         } catch (error) {
             console.log(error)
         }

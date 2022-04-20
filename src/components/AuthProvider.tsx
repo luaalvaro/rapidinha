@@ -41,10 +41,6 @@ const AuthProvider: React.FC = ({ children }) => {
 
     useEffect(() => {
         setSessionOrRedirect(supabase.auth.session())
-
-        supabase.auth.onAuthStateChange((_event, session) => {
-            setSessionOrRedirect(session)
-        })
     }, [])
 
     return (
