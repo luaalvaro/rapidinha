@@ -22,7 +22,7 @@ const AuthProvider: React.FC = ({ children }) => {
 
     const setSessionOrRedirect = async (session: Session | null) => {
         if (!session)
-            return
+            return await supabase.auth.signOut()
 
         if (!Auth.userDetails) {
             const { data, error } = await supabase

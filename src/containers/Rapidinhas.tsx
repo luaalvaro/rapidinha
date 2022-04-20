@@ -17,7 +17,7 @@ const Rapidinhas: React.FC = () => {
 
             setRapidinhasData(data)
         } catch (error) {
-            console.error(error)
+            console.log('Error fetching rapidinhas: ', error)
         }
     }
 

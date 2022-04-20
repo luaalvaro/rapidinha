@@ -288,6 +288,7 @@ const Notificacoes: NextPage = () => {
               my="5"
               width="100%"
               justify="space-between"
+              cursor="pointer"
             >
               <Text
                 fontWeight={mail.read ? 400 : 700}

@@ -76,8 +76,9 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
     }
 
     useEffect(() => {
-        getInboxNotifications()
-    }, [])
+        if (Auth.session)
+            getInboxNotifications()
+    }, [Auth.session])
 
     return (
         <Flex
