@@ -114,7 +114,7 @@ const Notificacoes: NextPage = () => {
         if (!notifications)
           return
 
-        const newData: Notification[] | null = notifications.map((email) => {
+        const newData = notifications.map((email) => {
           if (email.id === data.id) {
             console.log('DEU MATCH')
             return data

@@ -195,7 +195,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                                 </Flex>
                             ))}
 
-                            {!notifications &&
+                            {notifications?.length === 0 &&
                                 <Flex
                                     cursor="pointer"
                                     gridGap="50px"
