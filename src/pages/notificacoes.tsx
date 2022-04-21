@@ -111,6 +111,9 @@ const Notificacoes: NextPage = () => {
         if (error)
           throw error
 
+        if (!data)
+          return
+
         if (!notifications)
           return
 
