@@ -15,7 +15,7 @@ const useAuth = create<useAuthProps>(set => ({
     setSession: (newSession: Session) => set(state => ({ session: newSession })),
     userDetails: null,
     setUserDetails: (newUserDetails: Profiles) => set(state => ({ userDetails: newUserDetails })),
-    logout: () => set(state => ({ session: null }))
+    logout: () => set(state => ({ session: null, userDetails: null }))
 }))
 
 export default useAuth

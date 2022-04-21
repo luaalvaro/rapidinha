@@ -1,11 +1,13 @@
 import { Box, Button, Center, Flex, Skeleton, Stack, Text } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
+import useAuth from '../store/Auth'
 import { supabase } from '../utils/supabaseClient'
 import CardRapidinha from './CardRapidinha'
 import { Rapidinha } from './RapidinhaById'
 
 const Rapidinhas: React.FC = () => {
 
+    const Auth = useAuth(state => state)
     const [rapidinhasData, setRapidinhasData] = useState<Rapidinha[] | null>(null)
 
     const fetchRapidinhas = async () => {
@@ -44,7 +46,7 @@ const Rapidinhas: React.FC = () => {
                 mb="20px"
                 height="40px"
                 align="center"
-                justify="space-between"
+                justify={Auth.session ? "space-between" : "space-around"}
                 flexWrap="wrap"
             >
                 <Center
@@ -59,12 +61,14 @@ const Rapidinhas: React.FC = () => {
                     <Box w={5} h={5} bg="Orange" />
                     <Text color="#FFF" fontSize={["14px", "16px", "16px", "16px"]}>Indisponível</Text>
                 </Center>
-                <Center
-                    gridGap="10px"
-                >
-                    <Box w={5} h={5} bg="#25D985" />
-                    <Text color="#FFF" fontSize={["14px", "16px", "16px", "16px"]}>Seu número</Text>
-                </Center>
+                {Auth.session &&
+                    <Center
+                        gridGap="10px"
+                    >
+                        <Box w={5} h={5} bg="#25D985" />
+                        <Text color="#FFF" fontSize={["14px", "16px", "16px", "16px"]}>Seu número</Text>
+                    </Center>
+                }
             </Flex>
 
             <Flex
