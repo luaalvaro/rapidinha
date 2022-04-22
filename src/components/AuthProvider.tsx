@@ -20,13 +20,14 @@ const AuthProvider: React.FC = ({ children }) => {
 
     const router = useRouter()
     const Auth = useAuth(state => state)
-    const global = useGlobal(state => state)
 
     const setSessionOrRedirect = async (session: Session | null) => {
-        console.log('26 Set session or redirect')
+        console.log('Verificando status da sessão...')
         try {
             if (!session)
                 return await supabase.auth.signOut()
+
+            Auth.setSession(session)
 
             if (!Auth.userDetails) {
                 const { data, error } = await supabase
@@ -40,32 +41,11 @@ const AuthProvider: React.FC = ({ children }) => {
                 Auth.setUserDetails(data)
             }
 
-            Auth.setSession(session)
+
         } catch (error) {
             console.log(error)
         }
     }
-
-    const reloadProfileInfo = async () => {
-        console.log('50 Reload profile')
-        try {
-            const { data, error } = await supabase
-                .from<Profiles>('profiles')
-                .select('*')
-                .single()
-
-            if (!data)
-                return router.push('/login')
-
-            Auth.setUserDetails(data)
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-    useEffect(() => {
-        reloadProfileInfo()
-    }, [global.reloadProfile])
 
     useEffect(() => {
         setSessionOrRedirect(supabase.auth.session())

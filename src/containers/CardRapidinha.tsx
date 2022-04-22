@@ -108,7 +108,6 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
     }
 
     const handlePurchaseTicket = async (id_rap: number) => {
-        console.log('handlePurchaseTicket')
         /**
          * Essa função precisa identificar o usuário (id)
          * e a INTENÇÃO DE COMPRA (Número disponível da rapidinha)
@@ -148,8 +147,6 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
 
             const data = await response.json()
 
-            console.log(response.status)
-
             if (response.status === 200) {
                 toast({
                     title: 'Participação confirmada',
@@ -157,10 +154,10 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                     duration: 5000
                 })
 
-                global.toggleReloadProfile()
+                Auth.setUserDetails(data.newProfile)
 
                 if (purchasedNumbers) {
-                    setPurchasedNumbers([...purchasedNumbers, ...data.newBet])
+                    setPurchasedNumbers([...purchasedNumbers, data.newBet])
                 }
             }
 

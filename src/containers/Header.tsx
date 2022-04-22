@@ -44,7 +44,6 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                 .select('*')
                 .order("created_at", { ascending: false })
 
-            console.log(data)
             setNotifications(data)
         } catch (error) {
             console.log(error)

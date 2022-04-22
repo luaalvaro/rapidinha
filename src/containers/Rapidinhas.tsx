@@ -7,8 +7,8 @@ import { Rapidinha } from './RapidinhaById'
 
 const Rapidinhas: React.FC = () => {
 
-    const Auth = useAuth(state => state)
     const [rapidinhasData, setRapidinhasData] = useState<Rapidinha[] | null>(null)
+    const Auth = useAuth(state => state)
 
     const fetchRapidinhas = async () => {
         try {

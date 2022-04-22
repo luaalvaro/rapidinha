@@ -25,6 +25,10 @@ const handler: NextApiHandler = async (req, res) => {
     console.log('---------------------------------------')
     const supabaseUrl = process.env.NEXT_PUBLIC_API_URL || ''
     const supabaseKey = process.env.MASTER_SUPABASE_KEY || ''
+
+    if (supabaseUrl === '' || supabaseKey === '')
+        return res.status(500).json({ message: 'Por favor, tente novamente' })
+
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     let currencyRefreshed: null | number = null
@@ -132,6 +136,7 @@ const handler: NextApiHandler = async (req, res) => {
                     chosen_number,
                     ticket_value
                 })
+                .single()
 
             newBet = data
             console.log('136 - compra do ticket efetuada com sucesso')
@@ -150,6 +155,7 @@ const handler: NextApiHandler = async (req, res) => {
                     currency: currencyRefreshed
                 })
                 .eq('id', user_id)
+                .single()
 
             newProfile = data
             console.log('154 - Saldo atualizado')
@@ -206,9 +212,13 @@ const handler: NextApiHandler = async (req, res) => {
 
     const getSortedAndCreatePaymentOrder = async (rapidinha: any) => {
         try {
+            console.log('209 - Pegando vencedor e informaçoes de pagamento')
+
+            if (!bets)
+                return console.log('212 - Sorteio n pode ser realizado, Não existem apostas pra essa rapidinha')
+
             const sortedNumber = getRandom(15)
 
-            console.log('212 - Pegando vencedor e informaçoes de pagamento')
             const winner = getWinner(bets || [], sortedNumber)
             const winner_id = winner[0].user_id
             const sortedAt = new Date(Date.now())
@@ -323,7 +333,8 @@ const handler: NextApiHandler = async (req, res) => {
     if (!isAvaliable)
         return res.status(400).json({ message: '195 - Número já selecionado por outro usuário' })
 
-    const qtdTicketsAcctually = bets && bets.length || 987987
+    const qtdTicketsAcctually = bets && bets.length || 0
+
     if (qtdTicketsAcctually === rapidinha.qtd_num)
         return res.status(400).json({ message: '192 - Esta rapidinha já atingiu o número máximo de apostas' })
 
