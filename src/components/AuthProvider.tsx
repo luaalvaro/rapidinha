@@ -37,6 +37,7 @@ const AuthProvider: React.FC = ({ children }) => {
 
                 if (!data)
                     return router.push('/login')
+
                 Auth.setSession(session)
                 Auth.setUserDetails(data)
             }

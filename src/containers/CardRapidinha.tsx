@@ -1,5 +1,5 @@
-import { Flex, Text, Center, Button, Grid, Stack, Skeleton, toast, useToast, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogCloseButton, AlertDialogBody, AlertDialogFooter, useDisclosure, } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
+import { Flex, Text, Center, Button, Grid, Stack, Skeleton, useToast, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogCloseButton, AlertDialogBody, AlertDialogFooter, useDisclosure, Spinner, } from '@chakra-ui/react'
+import { useEffect, useState, useRef } from 'react'
 import useAuth from '../store/Auth'
 import useGlobal from '../store/globalStore'
 import { supabase } from '../utils/supabaseClient'
@@ -37,7 +37,10 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
     const [loading, setLoading] = useState(false)
     const [modalAlertShowing, setModalAlertShowing] = useState(false)
     const { isOpen, onOpen, onClose } = useDisclosure()
+    const { isOpen: sortModalIsOpen, onOpen: sortModalOpen, onClose: sortModalClose } = useDisclosure()
     const [paymentOrder, setPaymentOrder] = useState<PaymentOrder | null>(null)
+    const [sortedNumberResult, setSortedNumberResult] = useState<number | null>(null)
+    const [lastBuyerIsWinner, setLastBuyerIsWinner] = useState<boolean | null>(null)
 
     const toast = useToast()
     const global = useGlobal(state => state)
@@ -156,6 +159,14 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
 
                 if (purchasedNumbers) {
                     setPurchasedNumbers([...purchasedNumbers, data.newBet])
+                }
+
+                if (data && data.sortedNumber) {
+                    //Número sorteado
+                    setSortedNumberResult(data.sortedNumber)
+                    setLastBuyerIsWinner(data.lastBuyerIsWinner)
+                    sortModalOpen()
+                    return
                 }
             }
 
@@ -427,7 +438,17 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                 rpdValue={data.ticket_value}
                 chosenNumber={chosenNumber}
             />
-        </Flex >
+
+            <SortModal
+                sortModalIsOpen={sortModalIsOpen}
+                sortModalOpen={sortModalOpen}
+                sortModalClose={sortModalClose}
+                rapidinhaId={data.id}
+                sortedNumber={sortedNumberResult}
+                award={data.award}
+                lastBuyerIsWinner={lastBuyerIsWinner}
+            />
+        </Flex>
     )
 }
 
@@ -459,7 +480,6 @@ const AlertConfirm: React.FC<AlertConfirmProps> = ({
             leastDestructiveRef={undefined}
             onClose={onClose}
             isOpen={isOpen}
-            isCentered
         >
             <AlertDialogOverlay />
 
@@ -483,6 +503,105 @@ const AlertConfirm: React.FC<AlertConfirmProps> = ({
                     </Button>
                 </AlertDialogFooter>
             </AlertDialogContent>
+        </AlertDialog>
+    )
+}
+
+interface ISortModal {
+    sortModalIsOpen: boolean,
+    sortModalOpen: () => void,
+    sortModalClose: () => void,
+    rapidinhaId: string,
+    sortedNumber: number | null,
+    award: number,
+    lastBuyerIsWinner: boolean | null,
+}
+
+const SortModal: React.FC<ISortModal> = ({
+    sortModalIsOpen,
+    sortModalOpen,
+    sortModalClose,
+    rapidinhaId,
+    sortedNumber,
+    award,
+    lastBuyerIsWinner,
+}) => {
+    const [sorting, setSorting] = useState(true)
+
+    useEffect(() => {
+        if (sortModalIsOpen) {
+            setTimeout(() => {
+                setSorting(false)
+            }, 5000)
+        }
+    }, [sortModalIsOpen])
+    return (
+        <AlertDialog
+            isOpen={sortModalIsOpen}
+            onClose={sortModalClose}
+            leastDestructiveRef={undefined}
+        >
+            <AlertDialogOverlay>
+                <AlertDialogContent
+                    mx="15px"
+                >
+                    <AlertDialogHeader
+                        fontSize='lg'
+                        fontWeight='bold'
+                        textAlign="center"
+                    >
+                        Sorteio da rapidinha #00{rapidinhaId}
+                    </AlertDialogHeader>
+
+                    <AlertDialogBody>
+
+                        {sorting &&
+                            <Center
+                                flexDirection="column"
+                                gridGap="20px"
+                            >
+                                <Spinner size="xl" />
+                                <Text fontWeight={600}>Sorteando número...</Text>
+                            </Center>
+                        }
+
+                        {!sorting &&
+                            <Center
+                                flexDirection="column"
+                            >
+                                <Text fontWeight={600}>Número sorteado: {sortedNumber}</Text>
+                                <Text fontWeight={600}>Prêmio: R$ {award}</Text>
+
+                                <br />
+
+                                {lastBuyerIsWinner &&
+                                    <>
+                                        <Text
+                                            color="green"
+                                            fontWeight={600}
+                                        >
+                                            VOCÊ FOI O SORTEADO!
+                                        </Text>
+                                        <Text
+                                            fontWeight={600}
+                                            fontSize={13}
+                                        >
+                                            E o prêmio já foi pago!
+                                        </Text>
+                                    </>
+                                }
+                            </Center>
+                        }
+
+                    </AlertDialogBody>
+
+                    <AlertDialogFooter>
+                        <Button onClick={sortModalClose}>
+                            Fechar
+                        </Button>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialogOverlay>
         </AlertDialog>
     )
 }

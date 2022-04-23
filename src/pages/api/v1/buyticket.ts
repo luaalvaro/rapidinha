@@ -203,7 +203,7 @@ const handler: NextApiHandler = async (req, res) => {
 
             if (error) console.log(error)
 
-            return true
+            return data
         } catch (error) {
             console.log(error)
             return false
@@ -277,7 +277,7 @@ const handler: NextApiHandler = async (req, res) => {
             const response = await setRapidinhaCompleted(rapidinha.id, sortedNumber, winner_id, sortedAt)
 
             if (response)
-                return true
+                return response
 
             return false
         } catch (error) {
@@ -367,6 +367,13 @@ const handler: NextApiHandler = async (req, res) => {
 
         await createNewRapidinha(id_rapidinha)
         console.log('341 - Rapidinha criada com sucesso')
+
+        return res.status(200).json({
+            ...newPurchase,
+            sortedNumber: response.result_sorted_numbers,
+            award: response.award,
+            lastBuyerIsWinner: response.winner_id === user_id,
+        })
     }
 
     console.log('---------------------------------------')
