@@ -62,6 +62,7 @@ const Login: NextPage = () => {
     return (
         <Container>
             <Flex
+                display="none"
                 width="100%"
                 height="60px"
                 borderBottom="1px solid #A5A5A5"

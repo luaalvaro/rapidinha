@@ -1,12 +1,13 @@
-import { Flex, Button, Text, Menu, MenuButton, MenuList, MenuItem, IconButton } from '@chakra-ui/react'
+import { Flex, Button, Text, Menu, MenuButton, MenuList, MenuItem, IconButton, Center } from '@chakra-ui/react'
 import { User } from '@supabase/supabase-js'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { supabase } from '../utils/supabaseClient'
-import { FaBars, FaHistory, FaPlus, FaUser } from 'react-icons/fa'
+import { FaBars, FaBell, FaHistory, FaPlus, FaUser } from 'react-icons/fa'
 import { IoMdExit } from 'react-icons/io'
 import useGlobal from '../store/globalStore'
+import useAuth from '../store/Auth'
 
 interface HeaderProps {
     variant?: string,
@@ -22,37 +23,61 @@ interface Profiles {
     updatedAt: string
 }
 
+interface Notification {
+    body: string,
+    created_at: string,
+    id: string,
+    read: boolean,
+    title: string,
+    user_id: string,
+}
 const Header: React.FC<HeaderProps> = ({ variant }) => {
 
+    const Auth = useAuth(state => state)
     const router = useRouter()
-    const [user, setUser] = useState<Profiles | null>(null)
-    const global = useGlobal(state => state)
+    const [notifications, setNotifications] = useState<Notification[] | null>(null)
 
-    const getUserProfile = async () => {
+    const getInboxNotifications = async () => {
         try {
             const { data, error } = await supabase
-                .from<Profiles>('profiles')
+                .from<Notification>('notifications')
                 .select('*')
-                .single()
+                .order("created_at", { ascending: false })
 
-            setUser(data)
+            setNotifications(data)
         } catch (error) {
-            console.error(error)
+            console.log(error)
         }
     }
 
     const handleLogout = () => {
         supabase.auth.signOut()
-        setUser(null)
+        Auth.logout()
+    }
+
+    const convertDataShortView = (date: string) => {
+        let newDate: any = date.split('T')[0]
+        newDate = newDate.split('-')
+        newDate = `${newDate[2]}/${newDate[1]}`
+
+        return newDate
+    }
+
+    const numberOfNotificationsNotRead = (notifications: Notification[]) => {
+        const result = notifications.reduce((acc, cur) => {
+            if (cur.read === false)
+                return acc + 1
+
+            return acc
+        }, 0)
+
+        return result
     }
 
     useEffect(() => {
-        const userSupabase = supabase.auth.user()
-
-        if (userSupabase) {
-            getUserProfile()
-        }
-    }, [global.reloadProfile])
+        if (Auth.session)
+            getInboxNotifications()
+    }, [Auth.session])
 
     return (
         <Flex
@@ -71,7 +96,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                 <Image src="/logo.svg" alt="logo" width={85} height={29} priority />
             </Flex>
 
-            {!user &&
+            {!Auth.userDetails &&
                 <Flex
                     align="center"
                     gridGap="20px"
@@ -86,6 +111,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                     </Button>
 
                     <Button
+                        display="none"
                         color="#fff"
                         background="#25D985"
 
@@ -101,20 +127,104 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                 </Flex>
             }
 
-            {user &&
+            {Auth.userDetails &&
                 <Flex
                     align="center"
                     gridGap="25px"
                 >
+                    <Menu>
+                        <Flex
+                            position="relative"
+                        >
+                            <MenuButton
+                                color="#fff"
+                                as={IconButton}
+                                aria-label='Options'
+                                icon={<FaBell />}
+                                variant='outline'
+
+                                _hover={{
+                                    background: 'transparent'
+                                }}
+
+                                _active={{
+                                    background: 'transparent'
+                                }}
+                            />
+                            {notifications && numberOfNotificationsNotRead(notifications) !== 0 &&
+                                <Center
+                                    position="absolute"
+                                    borderRadius="100%"
+                                    background="red"
+                                    width="20px"
+                                    height="20px"
+                                    color="#fff"
+                                    fontWeight={700}
+                                    fontSize={12}
+                                    top={6}
+                                    left={7}
+                                >
+                                    {numberOfNotificationsNotRead(notifications)}
+                                </Center>
+                            }
+                        </Flex>
+                        <MenuList
+                            px="10px"
+                        >
+                            {notifications && notifications.map((mail, index) => (
+                                <Flex
+                                    key={index}
+                                    cursor="pointer"
+                                    gridGap="50px"
+                                    py="10px"
+                                    borderBottom="1px solid rgba(0,0,0,0.1)"
+                                    justify="space-between"
+
+                                    onClick={() => router.push(`/notificacoes`)}
+                                >
+                                    <Text
+                                        fontWeight={mail.read ? 400 : 700}
+                                    >
+                                        {mail.title}
+                                    </Text>
+                                    <Text
+                                    >
+                                        {convertDataShortView(mail.created_at)}
+                                    </Text>
+                                </Flex>
+                            ))}
+
+                            {notifications?.length === 0 &&
+                                <Flex
+                                    cursor="pointer"
+                                    gridGap="50px"
+                                    py="10px"
+                                    borderBottom="1px solid rgba(0,0,0,0.1)"
+                                    justify="space-between"
+                                >
+                                    <Text
+                                        fontWeight={700}
+                                    >
+                                        Nada por aqui
+                                    </Text>
+                                    <Text
+                                    >
+                                        :D
+                                    </Text>
+                                </Flex>
+                            }
+                        </MenuList>
+                    </Menu>
+
                     <Flex
                         borderRadius="5px"
                         color="#fff"
                         height="40px"
                         align="center"
                         px="12px"
-                        border="1px solid rgba(255,255,255,0.5)"
+                        border="1px solid rgba(255,255,255,0.8)"
                     >
-                        <Text width="max-content">R$ {user.currency}</Text>
+                        <Text width="max-content">R$ {Auth.userDetails.currency}</Text>
                     </Flex>
 
                     <Menu>
@@ -139,7 +249,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                                 fontWeight={500}
                                 my="5px"
                             >
-                                Olá, {user.firstName}
+                                Olá, {Auth.userDetails.firstName}
                             </Text>
                             <MenuItem icon={<FaUser />}>
                                 Perfil
@@ -148,7 +258,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                                 onClick={() => router.push('/minhasrapidinhas')}
                                 icon={<FaHistory />}
                             >
-                                Minhas rapidinhas
+                                Histórico
                             </MenuItem>
                             <MenuItem icon={<FaPlus />}>
                                 Depositar

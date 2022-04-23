@@ -1,15 +1,15 @@
 import { NextPage } from 'next'
 import Header from '../containers/Header'
-import Container from '../components/Container'
 import MinhasRapidinhas from '../containers/MinhasRapidinhas'
+import AuthProvider from '../components/AuthProvider'
 
 const Home: NextPage = () => {
 
   return (
-    <Container>
+    <AuthProvider>
       <Header />
       <MinhasRapidinhas />
-    </Container>
+    </AuthProvider>
   )
 }
 
