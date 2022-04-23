@@ -35,7 +35,6 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
 
     const [purchasedNumbers, setPurchasedNumbers] = useState<PurchasedNumbersProps[] | null>(null)
     const [chosenNumber, setChosenNumber] = useState<string | null>(null)
-    // const [user, setUser] = useState<User | null>(null)
     const [loading, setLoading] = useState(false)
     const [modalAlertShowing, setModalAlertShowing] = useState(false)
     const { isOpen, onOpen, onClose } = useDisclosure()
@@ -300,13 +299,13 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                         justify="space-between"
                     >
                         <Text
-                            fontSize="14px"
+                            fontSize="15px"
                             fontWeight={600}
                         >
                             Rapidinha #00{data.id}
                         </Text>
                         <Text
-                            fontSize="14px"
+                            fontSize="15px"
                         >
                             {purchasedNumbers.length}/{data.qtd_num}
                         </Text>
@@ -315,11 +314,12 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                     <Flex
                         justify="space-between"
                     >
-                        <Text fontSize="14px">Valor R$ {data.ticket_value}</Text>
-                        <Text fontSize="14px">Prêmio R$ {data.award}</Text>
+                        <Text fontSize="15px">Valor R$ {data.ticket_value}</Text>
+                        <Text fontSize="15px">Prêmio R$ {data.award}</Text>
                     </Flex>
 
                     <Flex
+                        my="10px"
                         minHeight="140px"
                         flex="1"
                         align="center"

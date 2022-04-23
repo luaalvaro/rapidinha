@@ -160,7 +160,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                                     height="20px"
                                     color="#fff"
                                     fontWeight={700}
-                                    fontSize={10}
+                                    fontSize={12}
                                     top={6}
                                     left={7}
                                 >

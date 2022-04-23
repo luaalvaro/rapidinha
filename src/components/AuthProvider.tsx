@@ -22,7 +22,6 @@ const AuthProvider: React.FC = ({ children }) => {
     const Auth = useAuth(state => state)
 
     const setSessionOrRedirect = async (session: Session | null) => {
-        console.log('Verificando status da sessão...')
         try {
             if (!session)
                 return await supabase.auth.signOut()
@@ -48,8 +47,10 @@ const AuthProvider: React.FC = ({ children }) => {
     }
 
     useEffect(() => {
+        console.log('Verificando status da sessão...')
+
         setSessionOrRedirect(supabase.auth.session())
-    }, [])
+    }, [supabase.auth.session])
 
     return (
         <Flex
