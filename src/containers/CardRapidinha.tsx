@@ -1,5 +1,4 @@
 import { Flex, Text, Center, Button, Grid, Stack, Skeleton, toast, useToast, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogCloseButton, AlertDialogBody, AlertDialogFooter, useDisclosure, } from '@chakra-ui/react'
-import { User } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
 import useAuth from '../store/Auth'
 import useGlobal from '../store/globalStore'
@@ -464,7 +463,9 @@ const AlertConfirm: React.FC<AlertConfirmProps> = ({
         >
             <AlertDialogOverlay />
 
-            <AlertDialogContent>
+            <AlertDialogContent
+                mx="15px"
+            >
                 <AlertDialogHeader>Confirmar rapidinha</AlertDialogHeader>
                 <AlertDialogCloseButton onClick={onClose} />
                 <AlertDialogBody>

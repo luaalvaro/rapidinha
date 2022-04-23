@@ -258,7 +258,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                                 onClick={() => router.push('/minhasrapidinhas')}
                                 icon={<FaHistory />}
                             >
-                                Minhas rapidinhas
+                                Histórico
                             </MenuItem>
                             <MenuItem icon={<FaPlus />}>
                                 Depositar

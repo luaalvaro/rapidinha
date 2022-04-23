@@ -20,10 +20,21 @@ export interface Rapidinha {
 
 const RapidinhasById: React.FC = () => {
 
-    const [rapidinhasData, setRapidinhasData] = useState<Rapidinha[] | null>(null)
+    const [rapidinhaData, setRapidinhaData] = useState<Rapidinha | null>(null)
     const router = useRouter()
 
-    const fetchRapidinhas = async () => {
+    const formatDatabaseDate = (date: string | null) => {
+        if (!date) return
+
+        const strDate = date.split('T')[0]
+        const strHour = date.split('T')[1].split(':')
+        const [year, month, day] = strDate.split('-')
+
+        const response = `${day}/${month}/${year} ${strHour[0]}:${strHour[1]}`
+        return response
+    }
+
+    const fetchRapidinha = async () => {
         try {
             const { rapidinha_id } = router.query
 
@@ -34,15 +45,16 @@ const RapidinhasById: React.FC = () => {
                 .from<Rapidinha>('rapidinhas')
                 .select('*')
                 .eq('id', rapidinha_id)
+                .single()
 
-            setRapidinhasData(data)
+            setRapidinhaData(data)
         } catch (error) {
             console.error(error)
         }
     }
 
     useEffect(() => {
-        fetchRapidinhas()
+        fetchRapidinha()
     }, [router.query])
 
     return (
@@ -63,7 +75,7 @@ const RapidinhasById: React.FC = () => {
                 gridGap="15px"
                 direction={["column-reverse", "column-reverse", "row", "row", "row"]}
             >
-                {!rapidinhasData &&
+                {!rapidinhaData &&
                     <Stack width="100%">
                         <Skeleton height='20px' />
                         <Skeleton height='20px' />
@@ -71,12 +83,31 @@ const RapidinhasById: React.FC = () => {
                     </Stack>
                 }
 
-                {rapidinhasData && rapidinhasData?.map((rapidinha, index) => (
-                    <CardRapidinha
-                        key={index}
-                        data={rapidinha}
-                    />
-                ))}
+                {rapidinhaData &&
+                    <Flex
+                        direction="column"
+                        color="#fff"
+                    >
+                        <Text>Rapidinha #00{rapidinhaData.id}</Text>
+                        <Text>Valor do prêmio: R$ {rapidinhaData.award}</Text>
+                        <Text>Valor do ticket: R$ {rapidinhaData.ticket_value}</Text>
+                        <Text>Total de bilhetes: {rapidinhaData.qtd_num}</Text>
+                        <br />
+                        <Text>Status: {
+                            rapidinhaData.status === 'completed'
+                                ? "Pagamento efetuado"
+                                : "Aguardando"
+                        }</Text>
+
+                        {rapidinhaData.result_sorted_numbers
+                            && <Text>Bilhete sorteado: {rapidinhaData.result_sorted_numbers}</Text>}
+
+                        <Text>Data de criação: {formatDatabaseDate(rapidinhaData.created_at)}</Text>
+
+                        {rapidinhaData.sortedAt
+                            && <Text>Data de realização: {formatDatabaseDate(rapidinhaData?.sortedAt)}</Text>}
+                    </Flex>
+                }
             </Flex>
         </Flex>
     )
