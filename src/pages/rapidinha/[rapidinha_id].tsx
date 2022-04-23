@@ -1,15 +1,15 @@
 import { NextPage } from 'next'
 import { Flex, } from '@chakra-ui/react'
 import Header from '../../containers/Header'
-import Container from '../../components/Container'
 import RapidinhasById from '../../containers/RapidinhaById'
+import AuthProvider from '../../components/AuthProvider'
 
 const Home: NextPage = () => {
   return (
-    <Container>
+    <AuthProvider>
       <Header />
       <RapidinhasById />
-    </Container>
+    </AuthProvider>
   )
 }
 

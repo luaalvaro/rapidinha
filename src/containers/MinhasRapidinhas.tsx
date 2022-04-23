@@ -23,7 +23,7 @@ const MinhasRapidinhas = () => {
             const user = supabase.auth.user()
 
             if (!user)
-                return
+                return router.push('/')
 
             const { data: rapidinha_bets, error } = await supabase
                 .from<RapidinhaBet>('rapidinha_bets')
