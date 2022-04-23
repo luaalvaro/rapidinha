@@ -394,7 +394,11 @@ const CardRapidinha: React.FC<CardRapidinhaProps> = ({ data }) => {
                                     background: !chosenNumber ? '' : '#20C578'
                                 }}
                             >
-                                {!chosenNumber ? 'Escolha um número e participe' : !Auth.session ? 'Faça login para participar' : 'Participar'}
+                                {!chosenNumber
+                                    ? 'Escolha um número e participe'
+                                    : !Auth.session
+                                        ? 'Faça login para participar'
+                                        : `Participar - R$ ${data.ticket_value}`}
                             </Button>
                         }
 

@@ -10,6 +10,7 @@ import useGlobal from '../store/globalStore'
 import { NextPage } from 'next/types'
 import Container from '../components/Container'
 import Header from '../containers/Header'
+import AuthProvider from '../components/AuthProvider'
 
 interface HeaderProps {
   variant?: string,
@@ -62,16 +63,10 @@ const Notificacoes: NextPage = () => {
         .select('*')
         .order("created_at", { ascending: false })
 
-      console.log(data)
       setNotifications(data)
     } catch (error) {
       console.log(error)
     }
-  }
-
-  const handleLogout = () => {
-    supabase.auth.signOut()
-    setUser(null)
   }
 
   const convertDataShortView = (date: string) => {
@@ -80,19 +75,6 @@ const Notificacoes: NextPage = () => {
     newDate = `${newDate[2]}/${newDate[1]}`
 
     return newDate
-  }
-
-  const numberOfNotificationsNotRead = (notifications: Notification[]) => {
-    const result = notifications.reduce((acc, cur) => {
-      if (cur.read === false)
-        return acc + 1
-
-      return acc
-    }, 0)
-
-    console.log(result)
-
-    return result
   }
 
   const handleOpenEmail = async (email: Notification) => {
@@ -151,116 +133,8 @@ const Notificacoes: NextPage = () => {
   }, [])
 
   return (
-    <Container>
-      <Flex
-        width="100%"
-        height="60px"
-        borderBottom="1px solid #A5A5A5"
-        justify="space-between"
-        px="15px"
-        gridGap="50px"
-      >
-
-        <Flex
-          cursor="pointer"
-          onClick={() => router.push('/')}
-        >
-          <Image src="/logo.svg" alt="logo" width={85} height={29} priority />
-        </Flex>
-
-        {!user &&
-          <Flex
-            align="center"
-            gridGap="20px"
-          >
-            <Button
-              variant="link"
-              color="#fff"
-
-              onClick={() => router.push('/login')}
-            >
-              Entrar
-            </Button>
-
-            <Button
-              color="#fff"
-              background="#25D985"
-
-              _hover={{
-                background: '#20C578'
-              }}
-              _active={{
-                background: '#20C578'
-              }}
-            >
-              Cadastre-se
-            </Button>
-          </Flex>
-        }
-
-        {user &&
-          <Flex
-            align="center"
-            gridGap="25px"
-          >
-            <Flex
-              borderRadius="5px"
-              color="#fff"
-              height="40px"
-              align="center"
-              px="12px"
-              border="1px solid rgba(255,255,255,0.5)"
-            >
-              <Text width="max-content">R$ {user.currency}</Text>
-            </Flex>
-
-            <Menu>
-              <MenuButton
-                color="#fff"
-                as={IconButton}
-                aria-label='Options'
-                icon={<FaBars />}
-                variant='outline'
-
-                _hover={{
-                  background: 'transparent'
-                }}
-
-                _active={{
-                  background: 'transparent'
-                }}
-              />
-              <MenuList>
-                <Text
-                  pl="15px"
-                  fontWeight={500}
-                  my="5px"
-                >
-                  Olá, {user.firstName}
-                </Text>
-                <MenuItem icon={<FaUser />}>
-                  Perfil
-                </MenuItem>
-                <MenuItem
-                  onClick={() => router.push('/minhasrapidinhas')}
-                  icon={<FaHistory />}
-                >
-                  Minhas rapidinhas
-                </MenuItem>
-                <MenuItem icon={<FaPlus />}>
-                  Depositar
-                </MenuItem>
-                <MenuItem
-                  onClick={handleLogout}
-                  icon={<IoMdExit />}
-                >
-                  Sair
-                </MenuItem>
-              </MenuList>
-            </Menu>
-          </Flex>
-        }
-      </Flex>
+    <AuthProvider>
+      <Header />
 
       <Flex
         direction="column"
@@ -327,7 +201,7 @@ const Notificacoes: NextPage = () => {
       >
         <Spinner size='xl' color="#fff" />
       </Center>
-    </Container>
+    </AuthProvider>
   )
 }
 

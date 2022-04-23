@@ -222,7 +222,7 @@ const Header: React.FC<HeaderProps> = ({ variant }) => {
                         height="40px"
                         align="center"
                         px="12px"
-                        border="1px solid rgba(255,255,255,0.5)"
+                        border="1px solid rgba(255,255,255,0.8)"
                     >
                         <Text width="max-content">R$ {Auth.userDetails.currency}</Text>
                     </Flex>

@@ -46,7 +46,8 @@ const Rapidinhas: React.FC = () => {
                 mb="20px"
                 height="40px"
                 align="center"
-                justify={Auth.session ? "space-between" : "space-around"}
+                // justify={Auth.session ? "space-between" : "space-between"}
+                gridGap={["15px", "20px", "25px", "30px"]}
                 flexWrap="wrap"
             >
                 <Center
