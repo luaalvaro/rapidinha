@@ -21,12 +21,13 @@ const AuthProvider: React.FC = ({ children }) => {
     const router = useRouter()
     const Auth = useAuth(state => state)
 
-    const setSessionOrRedirect = async (session: Session | null) => {
+    const setSessionOrRedirect = async () => {
+        console.log('Verificando status da sessão...')
         try {
+            const session = supabase.auth.session()
+
             if (!session)
                 return await supabase.auth.signOut()
-
-            Auth.setSession(session)
 
             if (!Auth.userDetails) {
                 const { data, error } = await supabase
@@ -36,7 +37,7 @@ const AuthProvider: React.FC = ({ children }) => {
 
                 if (!data)
                     return router.push('/login')
-
+                Auth.setSession(session)
                 Auth.setUserDetails(data)
             }
 
@@ -47,10 +48,10 @@ const AuthProvider: React.FC = ({ children }) => {
     }
 
     useEffect(() => {
-        console.log('Verificando status da sessão...')
+        setSessionOrRedirect()
 
-        setSessionOrRedirect(supabase.auth.session())
-    }, [supabase.auth.session])
+        setTimeout(setSessionOrRedirect, 3000)
+    }, [])
 
     return (
         <Flex
