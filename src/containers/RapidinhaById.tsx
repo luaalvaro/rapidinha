@@ -63,7 +63,6 @@ const RapidinhasById: React.FC = () => {
             direction="column"
         >
             <Text
-                fontSize="15px"
                 color="#fff"
                 mb="20px"
                 fontWeight={600}
@@ -86,26 +85,28 @@ const RapidinhasById: React.FC = () => {
                 {rapidinhaData &&
                     <Flex
                         direction="column"
-                        color="#fff"
+                        color="rgba(255, 255, 255, 0.8)"
                     >
-                        <Text>Rapidinha #00{rapidinhaData.id}</Text>
-                        <Text>Valor do prêmio: R$ {rapidinhaData.award}</Text>
-                        <Text>Valor do ticket: R$ {rapidinhaData.ticket_value}</Text>
-                        <Text>Total de bilhetes: {rapidinhaData.qtd_num}</Text>
+                        <Text>Rapidinha: <b>#00{rapidinhaData.id}</b></Text>
+                        <Text>Valor do prêmio: <b>R$ {rapidinhaData.award}</b></Text>
+                        <Text>Valor do ticket: <b>R$ {rapidinhaData.ticket_value}</b></Text>
+                        <Text>Total de bilhetes: <b>{rapidinhaData.qtd_num}</b></Text>
                         <br />
-                        <Text>Status: {
-                            rapidinhaData.status === 'completed'
-                                ? "Pagamento efetuado"
-                                : "Aguardando"
-                        }</Text>
+                        <Text>Status: <b>
+                            {
+                                rapidinhaData.status === 'completed'
+                                    ? "Pagamento efetuado"
+                                    : "Aguardando"
+                            }
+                        </b></Text>
 
                         {rapidinhaData.result_sorted_numbers
-                            && <Text>Bilhete sorteado: {rapidinhaData.result_sorted_numbers}</Text>}
+                            && <Text>Número sorteado: <b>{rapidinhaData.result_sorted_numbers}</b></Text>}
 
-                        <Text>Data de criação: {formatDatabaseDate(rapidinhaData.created_at)}</Text>
+                        <Text>Data de criação: <b>{formatDatabaseDate(rapidinhaData.created_at)}</b></Text>
 
                         {rapidinhaData.sortedAt
-                            && <Text>Data de realização: {formatDatabaseDate(rapidinhaData?.sortedAt)}</Text>}
+                            && <Text>Data de realização: <b>{formatDatabaseDate(rapidinhaData?.sortedAt)}</b></Text>}
                     </Flex>
                 }
             </Flex>

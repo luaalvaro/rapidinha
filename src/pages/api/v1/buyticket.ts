@@ -139,7 +139,7 @@ const handler: NextApiHandler = async (req, res) => {
                 .single()
 
             newBet = data
-            console.log('136 - compra do ticket efetuada com sucesso')
+            console.log('136 - Compra do ticket efetuada com sucesso')
         } catch (error) {
             console.log(error)
             return res.status(400).json({ message: '124 Error na hora de criar uma aposta' })
@@ -182,7 +182,7 @@ const handler: NextApiHandler = async (req, res) => {
     const getWinner = (bets: Bets[], sortedNumber: number) => {
         console.log('177 - Filtrando vencedor')
         const winner = bets.filter(bet => bet.chosen_number === sortedNumber)
-        console.log('Vencedor:', winner)
+        console.log('185 - Vencedor encontrado')
         return winner
     }
 
@@ -222,12 +222,10 @@ const handler: NextApiHandler = async (req, res) => {
             const winner = getWinner(bets || [], sortedNumber)
             const winner_id = winner[0].user_id
             const sortedAt = new Date(Date.now())
+
             const rapidinhaTotalMoney = rapidinha.qtd_num * rapidinha.ticket_value
             const rapidinhaFeeMoney = rapidinhaTotalMoney * (rapidinha.fee / 100)
             const rapidinhaAward = rapidinhaTotalMoney - rapidinhaFeeMoney
-
-            console.log('217 - Número sorteado', sortedNumber)
-            console.log('218 - Criando ordem de pagamento para o vencedor')
 
             if (!currencyRefreshed)
                 throw 'Currency not refreshed'
@@ -240,7 +238,11 @@ const handler: NextApiHandler = async (req, res) => {
                 })
                 .eq('id', winner_id)
 
+            if (errorAddCash) console.log(errorAddCash)
 
+            console.log('241 - Saldo do vencedor atualizado')
+
+            // Criar ordem de pagamento (extrato de pagamento)
             const { data, error } = await supabase
                 .from('rapidinha_payments')
                 .insert({
@@ -256,8 +258,10 @@ const handler: NextApiHandler = async (req, res) => {
 
             if (error) console.log(error)
 
-            console.log('237 - Usuário recebeu o premio e ordem de pagamento criada')
+            console.log('261 - Ordem de pagamento criada')
 
+
+            // Criar notificação de pagamento para o vencedor
             const { data: dataNewNotification, error: errorNewNotification } = await supabase
                 .from('notifications')
                 .insert({
@@ -267,6 +271,8 @@ const handler: NextApiHandler = async (req, res) => {
                     user_id: winner_id,
                     read: false,
                 })
+
+            console.log('275 - Notificação de pagamento criada')
 
             const response = await setRapidinhaCompleted(rapidinha.id, sortedNumber, winner_id, sortedAt)
 
@@ -279,16 +285,22 @@ const handler: NextApiHandler = async (req, res) => {
         }
     }
 
-    const createNewRapidinha = async () => {
+    const createNewRapidinha = async (id: any) => {
         //Criar nova rapidinha automaticamente
+        const numberIs = Number(id) % 2 === 0 ? "par" : "impar"
+        const tValue = numberIs === "par" ? 2 : 5
+        const rAward = numberIs === "par" ? 21 : 52.5
+
+        console.log(`288 - Criando rapidinha ${numberIs}`)
+
         try {
             const { data, error } = await supabase
                 .from('rapidinhas')
                 .insert({
                     qtd_num: 15,
                     fee: 30,
-                    ticket_value: 2,
-                    award: 21,
+                    ticket_value: tValue,
+                    award: rAward,
                     status: 'waiting',
                     qtd_winners: 1
                 })
@@ -353,7 +365,7 @@ const handler: NextApiHandler = async (req, res) => {
         const response = await getSortedAndCreatePaymentOrder(rapidinha)
         console.log('337 - Sorteio realizado com sucesso?', response)
 
-        await createNewRapidinha()
+        await createNewRapidinha(id_rapidinha)
         console.log('341 - Rapidinha criada com sucesso')
     }
 
