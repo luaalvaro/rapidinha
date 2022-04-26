@@ -63,11 +63,14 @@ const handler: NextApiHandler = async (req, res) => {
                 .eq('id', id)
                 .single()
 
+            if (error) throw error
+
             const { currency } = data;
             console.log('63 - Saldo do usuário:', currency)
             return currency
         } catch (error) {
             console.log(error)
+            return res.status(400).json({ message: '73 - Não foi possível resgatar informações do usuário, tente novamente!' })
         }
     }
 
@@ -79,10 +82,13 @@ const handler: NextApiHandler = async (req, res) => {
                 .select('*')
                 .eq('rapidinha_id', id_rapidinha)
 
+            if (error) throw error
+
             console.log('78 - Apostas encontradas:', data?.length)
             return data
         } catch (error) {
             console.log(error)
+            return res.status(400).json({ message: '91 - Não foi possível resgatar informações das apostas, tente novamente!' })
         }
     }
 
@@ -96,9 +102,13 @@ const handler: NextApiHandler = async (req, res) => {
                 .eq('id', id)
                 .single()
 
+            if (error)
+                throw error
+
             return data
         } catch (error) {
             console.log(error)
+            return res.status(500).json({ message: '105 - Não foi possível resgatar a rapidinha, tente novamente!' })
         }
     }
 
@@ -181,8 +191,8 @@ const handler: NextApiHandler = async (req, res) => {
 
     const getWinner = (bets: Bets[], sortedNumber: number) => {
         console.log('177 - Filtrando vencedor')
-        const winner = bets.filter(bet => bet.chosen_number === sortedNumber)
-        console.log('185 - Vencedor encontrado')
+        const winner = bets.filter(bet => bet.chosen_number === sortedNumber)[0]
+        console.log('185 - Vencedor encontrado', winner)
         return winner
     }
 
@@ -220,7 +230,6 @@ const handler: NextApiHandler = async (req, res) => {
             const sortedNumber = getRandom(15)
 
             const winner = getWinner(bets || [], sortedNumber)
-            const winner_id = winner[0].user_id
             const sortedAt = new Date(Date.now())
 
             const rapidinhaTotalMoney = rapidinha.qtd_num * rapidinha.ticket_value
@@ -236,7 +245,7 @@ const handler: NextApiHandler = async (req, res) => {
                 .update({
                     currency: currencyRefreshed + rapidinhaAward
                 })
-                .eq('id', winner_id)
+                .eq('id', winner.user_id)
 
             if (errorAddCash) console.log(errorAddCash)
 
@@ -248,7 +257,7 @@ const handler: NextApiHandler = async (req, res) => {
                 .insert({
                     rapidinha_id: rapidinha.id,
                     result_sorted_numbers: sortedNumber,
-                    winner_id: winner_id,
+                    winner_id: winner.user_id,
                     total_money: rapidinhaTotalMoney,
                     fee: rapidinhaFeeMoney,
                     award: rapidinhaAward,
@@ -266,15 +275,15 @@ const handler: NextApiHandler = async (req, res) => {
                 .from('notifications')
                 .insert({
                     title: 'Parabéns! Seu número foi sorteado',
-                    body: `Você ganhou R$ ${rapidinhaAward} na rapidinha ${rapidinha.id},
+                    body: `Você ganhou R$ ${rapidinhaAward} na rapidinha #00${rapidinha.id},
                     e o valor já foi creditado na sua conta!`,
-                    user_id: winner_id,
+                    user_id: winner.user_id,
                     read: false,
                 })
 
             console.log('275 - Notificação de pagamento criada')
 
-            const response = await setRapidinhaCompleted(rapidinha.id, sortedNumber, winner_id, sortedAt)
+            const response = await setRapidinhaCompleted(rapidinha.id, sortedNumber, winner.user_id, sortedAt)
 
             if (response)
                 return response
@@ -319,13 +328,12 @@ const handler: NextApiHandler = async (req, res) => {
         return res.status(401).json({ message: '164 - Não autorizado' })
 
     const user = checkTokenIsValid(token)
-
     const { id_rapidinha, chosen_number } = req.body;
 
-    if (!id_rapidinha || !chosen_number)
-        return res.status(400).json({ message: '171 - Requisição bloqueada' })
+    if (!id_rapidinha || !chosen_number || !user || !user.sub)
+        return res.status(400).json({ message: '171 - Requisição faltando detalhes, tente novamente!' })
 
-    const user_id = user?.sub || ""
+    const user_id = user.sub
     const userCurrency = await getUserCurrency(user_id)
     const rapidinha = await getRapidinha(id_rapidinha)
     const ticket_value = rapidinha.ticket_value || 0
