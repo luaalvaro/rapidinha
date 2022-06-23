@@ -3,12 +3,14 @@ import { Flex, } from '@chakra-ui/react'
 import Header from '../containers/Header'
 import Rapidinhas from '../containers/Rapidinhas'
 import AuthProvider from '../components/AuthProvider'
+import MineGame from '../containers/MineGame'
 
 const Home: NextPage = () => {
   return (
     <AuthProvider>
       <Header />
-      <Rapidinhas />
+      {/* <Rapidinhas /> */}
+      <MineGame />
     </AuthProvider>
   )
 }
